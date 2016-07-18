@@ -1,0 +1,272 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@model List<LoginUserVM>
+@{
+    ViewBag.Title = @Html.MultilingualHtml("LoginUserManage");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    PagingInfo PagingInfoModel = null;
+
+    if (ViewBag.PagingInfoModel != null)
+    {
+        PagingInfoModel = (PagingInfo)ViewBag.PagingInfoModel;
+    }
+    int preCount = 0;
+
+    string sortName = "";
+    string sortDir = "";
+
+    if (HttpContext.Current.Request.QueryString.AllKeys.Contains("sort"))
+    {
+        sortName = HttpContext.Current.Request.QueryString["sort"];
+    }
+
+    if (HttpContext.Current.Request.QueryString.AllKeys.Contains("sortDir"))
+    {
+        sortDir = HttpContext.Current.Request.QueryString["sortDir"];
+    }
+}
+
+
+
+<fieldset>
+    <legend>
+        <h5>@Html.MultilingualHtml("SearchCriteria")</h5>
+    </legend>
+    @using (Html.BeginForm("Index", "LoginUserManage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        LoginUserVM selectionCriteria = new LoginUserVM();
+        if (ViewBag.SelectionCriteria != null)
+        {
+            selectionCriteria = (LoginUserVM)ViewBag.SelectionCriteria;
+        }
+        <div class="form-group">
+            <label class="control-label col-md-2" style=" text-align:left;" for="LoginName">@Html.MultilingualHtml("LoginName")</label>
+            <div class="col-md-4">
+                @Html.TextBox("LoginName", selectionCriteria.LoginName, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2" style=" text-align:left;" for="RoleName">@Html.MultilingualHtml("UserType")</label>
+            <div class="col-md-6">
+                <label class="radio-inline">
+                    <input type="radio" id="UserType" name="UserType" value="" @{if (!selectionCriteria.UserType.HasValue) { <text> checked='checked' </text>                              } } /> @Html.MultilingualHtml("All")
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" id="UserType" name="UserType" value="1" onclick="ChangeLoginUserType(this);"
+                           @{if (selectionCriteria.UserType.HasValue && selectionCriteria.UserType == 1) { <text> checked='checked' </text>                      } } /> @Html.MultilingualHtml("SpecificFunctions")
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" id="UserType" name="UserType" value="2" onclick="ChangeLoginUserType(this);"
+                               @{if (selectionCriteria.UserType.HasValue && selectionCriteria.UserType == 2) { <text> checked='checked' </text>                      } } /> @Html.MultilingualHtml("AsRoleSetting")
+                        </label>
+
+                        <label class="radio-inline">
+                            <input type="radio" id="UserType" name="UserType" value="3" onclick="ChangeLoginUserType(this);"
+                                   @{if (selectionCriteria.UserType.HasValue && selectionCriteria.UserType == 3) { <text> checked='checked' </text>                      } } /> @Html.MultilingualHtml("AsOrgSetting")
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="RoleContent">
+                        <label class="control-label col-md-2" style=" text-align:left;" for="SC_RoleName">@Html.MultilingualHtml("RoleName")</label>
+                        <div class="col-md-4">
+                            @Html.TextBox("SC_RoleName", selectionCriteria.SC_RoleName, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="OrgContent">
+                        <label class="control-label col-md-2" style=" text-align:left;" for="SC_OrgKey">@Html.MultilingualHtml("OrganizationKey")</label>
+                        <div class="col-md-4">
+                            @Html.TextBox("SC_OrgKey", selectionCriteria.SC_OrgKey, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <input type="submit" value="@Html.MultilingualHtml("Search")" class="btn btn-default" onclick="OpenLoadingDialog()">
+                        </div>
+                    </div>
+    }
+</fieldset>
+@Html.Raw(Html.CPaging("Index", "LoginUserManage", PagingInfoModel, "AccessControl", sortName, sortDir))
+<div class="row col-md-12">
+    &nbsp;
+</div>
+<div class="row col-md-12">
+    <div class="table-responsive">
+        <table class="table table-striped fa-border table-hover" contenteditable="false">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "LoginName")' id="LoginNameTH">@Html.MultilingualHtml("LoginName")</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "StrRoles")' id="StrRolesTH">@Html.MultilingualHtml("RoleName")</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "StrOrgs")' id="StrOrgsTH">@Html.MultilingualHtml("OrganizationKey")</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "CreateDate")' id="CreateDateTH">@Html.MultilingualHtml("CreateDate")</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "LastLoginDT")' id="LastLoginDTTH">@Html.MultilingualHtml("LastLoginDT")</th>
+                    <th colspan="2" align="center" style="text-align:center;">@Html.MultilingualHtml("Operation")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    for (int i = 0; i < Model.Count; ++i)
+                    {
+                        var deleteURL = Url.Action("Delete", "LoginUserManage", new { area = "AccessControl", UserID = Model[i].ID });
+                        var detailsURL = Url.Action("Edit", "LoginUserManage", new { area = "AccessControl", UserID = Model[i].ID });
+
+                        var data = Html.Raw("{UserID:\"" + @Model[i].ID + "\"}");
+
+                        var str_RoleLink = "";
+                        var str_OrgLink = "";
+
+                        if (Model[i].EntityList_Role.Count > 0)
+                        {
+                            List<string> strList_RoleLink = new List<string>();
+                            Model[i].EntityList_Role.ForEach(current =>
+                            {
+                                strList_RoleLink.Add(Html.ActionLink(current.RoleName, "Edit", "LURoleManage", new { area = "AccessControl", guid = current.ID }, null).ToString());
+                            });
+
+                            if (strList_RoleLink.Count > 0)
+                            {
+                                str_RoleLink = strList_RoleLink.Aggregate((first, next) =>
+                                {
+                                    return first + "," + next;
+                                });
+                            }
+                        }
+
+                        if (Model[i].EntityList_Org.Count > 0)
+                        {
+                            List<string> strList_OrgLink = new List<string>();
+                            Model[i].EntityList_Org.ForEach(current =>
+                            {
+                                strList_OrgLink.Add(Html.ActionLink(current.OrganizationKey, "Edit", "LUOrganizationManage", new { area = "AccessControl", guid = current.ID }, null).ToString());
+                            });
+
+                            if (strList_OrgLink.Count > 0)
+                            {
+                                str_OrgLink = strList_OrgLink.Aggregate((first, next) =>
+                                {
+                                    return first + "," + next;
+                                });
+                            }
+                        }
+                        <tr>
+                            <td class="vert-align">@Convert.ToInt32(i + 1 + preCount)</td>
+                            <td align="center" class="vert-align">@Model[i].LoginName</td>
+                            <td align="center" class="vert-align">@Html.Raw(str_RoleLink)</td>
+                            <td align="center" class="vert-align">@Html.Raw(str_OrgLink)</td>
+                            <td align="center" class="vert-align">@(Model[i].CreateDate.HasValue ? Model[i].CreateDate.Value.ToString(((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).DateFormat + " " + ((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).TimeFormat) : "")</td>
+                            <td align="center" class="vert-align">@(Model[i].LastLoginDT.HasValue ? Model[i].LastLoginDT.Value.ToString(((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).DateFormat + " " + ((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).TimeFormat) : "")</td>
+
+
+                            @if (Model[i].AllowEdit)
+                            {
+                                if (CoolPrivilegeControlVM.CommonVM.StaticContent.LockAdmin() && Model[i] != null && !string.IsNullOrWhiteSpace(Model[i].LoginName))
+                                {
+                                    if (Model[i].LoginName.ToLower() != "admin")
+                                    {
+                                        <td align="center" width="70px"><a class="btn btn-default" href='@detailsURL'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Edit")</a></td>
+                                    }
+                                    else
+                                    {
+                                        <td align="center" width="70px"><a class="btn btn-default disabled" href='#'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Edit")</a></td>
+                                    }
+                                }
+                                else
+                                {
+                                    <td align="center" width="70px"><a class="btn btn-default" href='@detailsURL'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Edit")</a></td>
+                                }
+                            }
+                            else
+                            {
+                                <td align="center" width="70px"><a class="btn btn-default disabled" href='#'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Edit")</a></td>
+                            }
+
+                            @if (Model[i].AllowDel)
+                            {
+                                if (CoolPrivilegeControlVM.CommonVM.StaticContent.LockAdmin() && Model[i] != null && !string.IsNullOrWhiteSpace(Model[i].LoginName))
+                                {
+                                    if (Model[i].LoginName.ToLower() != "admin")
+                                    {
+                                        <td align="center" width="70px"><a class="btn btn-danger" href='javascript:InvokeDeleteFunction_ByAjax(@data,"@deleteURL","@detailsURL");'><i class="fa fa-trash-o fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                                    }
+                                    else
+                                    {
+                                        <td align="center" width="70px"><a class="btn btn-danger disabled" href='#'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                                    }
+                                }
+                                else
+                                {
+                                    <td align="center" width="70px"><a class="btn btn-danger" href='javascript:InvokeDeleteFunction_ByAjax(@data,"@deleteURL","@detailsURL");'><i class="fa fa-trash-o fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                                }
+                            }
+                            else
+                            {
+                                <td align="center" width="70px"><a class="btn btn-danger disabled" href='#'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@Html.Raw(Html.CPaging("Index", "LoginUserManage", PagingInfoModel, "AccessControl", sortName, sortDir))
+<br />
+<div class="row">
+    <div class="col-md-12">
+        @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, "LoginUserManage", "Create"))
+        {
+            <a href=@Url.Action("Create", "LoginUserManage" , null) class="btn btn-default" role="button">@Html.MultilingualHtml("LoginUserManage_Create")</a>
+        }
+    </div>
+</div>
+
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<script type="text/javascript">
+    var CurrentFunDetailInfo;
+
+    function ChangeLoginUserType(sender) {
+        var UserType = 0;
+        if (sender != null && sender != undefined) {
+            if ($(sender).is(':checked')) {
+                UserType = $(sender).val();
+            }
+        }
+        else {
+            UserType = $('input[name=UserType]').filter(':checked').val();
+        }
+        if (UserType == 2) {
+            $("#RoleContent").show();
+            $("#OrgContent").hide();
+        }
+        else if (UserType == 1) {
+            $("#RoleContent").hide();
+            $("#OrgContent").hide();
+        }
+        else if (UserType == 3) {
+            $("#RoleContent").hide();
+            $("#OrgContent").show();
+        }
+        else {
+            $("#RoleContent").hide();
+            $("#OrgContent").hide();
+        }
+    }
+
+    $(document).ready(function () {
+        findSortingTh("LoginNameTH", "asc");
+        ChangeLoginUserType();
+    });
+</script>

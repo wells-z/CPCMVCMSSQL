@@ -1,0 +1,140 @@
+﻿@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+    <title>@ViewBag.Title</title>
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/Common")
+
+    @Styles.Render("~/Content/css")
+
+    @RenderSection("css", required: false)
+</head>
+<body>
+    <div class="container">
+        @if (TempData.ContainsKey(UI_Infrastructure.Bootstrapper.UserClientSessionKey.ToString()))
+        {   
+            @Html.Raw(Html.GenMenuBar(ViewContext.Controller, Context, "/AccessControl/Login/Logout", "/Content/imgs/WellsTechLogo.png"))
+        }
+    </div>
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-2 pull-right">
+                <div class="pull-right" style=" vertical-align: middle !important;" id="TotalVisitedDiv">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div id="DateTimeDiv"></div>
+            </div>
+
+        </div>
+        @Html.Raw(Html.GenNavBar(ViewContext.Controller, Context))
+        @RenderBody()
+    </div>
+
+    @*<div class="modal js-loading-bar" id="pleaseWaitDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="center-block"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+    @RenderSection("scripts", required: false)
+    <script>
+        function GenerateCounter(totalLoginCounter) {
+            if (totalLoginCounter != "" && totalLoginCounter != undefined && totalLoginCounter != null) {
+                var totalLoginCounter = totalLoginCounter.split('');
+                $("#TotalVisitedDiv").html("");
+                for (var i = 0; i < totalLoginCounter.length; ++i) {
+                    if (i == 0) {
+                        $("#TotalVisitedDiv").append("<img src=\"/Content/imgs/Numbers-" + totalLoginCounter[i] + "-Black-icon.png\" width=\"16px\" height=\"16px\" style=\"margin:2px 0px;\" />");
+                    }
+                    else {
+                        $("#TotalVisitedDiv").append("<img src=\"/Content/imgs/Numbers-" + totalLoginCounter[i] + "-Black-icon.png\" width=\"16px\" height=\"16px\" style=\"margin:2px 0px;margin-left:-5px;\" />");
+                    }
+                }
+            }
+        }
+
+        function GetSystemInfo() {
+            var str_PostUrl = "@Url.Action("GetCurrentDatetimeAndTotalCount", "Login", null)";
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                url: str_PostUrl,
+                data: "",
+                success: function (response) {
+                    if (response != null && response != undefined && response != "") {
+                        var CurrentInfoVM = $.parseJSON(response);
+                        var currentDt = moment(CurrentInfoVM.CurrDateTime);
+                        $("#DateTimeDiv").text(currentDt.format('dddd, MMMM DD YYYY, hh:mm:ss '));
+                        GenerateCounter(CurrentInfoVM.TotalLoginCount);
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            @if (ViewBag.ActionMessage != null)
+            {
+                var msgInfo = ((MsgInfo)ViewBag.ActionMessage);
+
+                if (msgInfo.MsgType==MessageType.Success)
+                {
+                    @:ShowMsg(BootstrapDialog.TYPE_SUCCESS, "@Html.Encode(msgInfo.MsgTitle)", "@Html.Raw(CoolUtilities.StringUtility.ReplaceAll(msgInfo.MsgDesc,"'","\'"))");
+                                                                                                                                                                                                                                                                                            }
+                else
+                {
+                    @:ShowMsg(BootstrapDialog.TYPE_DANGER, "@Html.Encode(msgInfo.MsgTitle)", "@Html.Raw(CoolUtilities.StringUtility.ReplaceAll(msgInfo.MsgDesc,"'","\'"))");
+                }
+
+                string actionKey = CoolPrivilegeControlVM.CommonVM.StaticContent.ActionMessage_Prefix + "_" + HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+                if (TempData.ContainsKey(actionKey))
+                {
+                    TempData.Remove(actionKey);
+                }
+             }
+
+            $("table thead tr th[onclick]").hover(function () {
+                if ($(this).attr("class") == "highlight") {
+                    $(this).removeAttr("class");
+                }
+                else {
+                    $(this).attr("class", "highlight");
+                }
+            }, function () {
+                if ($(this).attr("class") == "highlight") {
+                    $(this).removeAttr("class");
+                }
+                else {
+                    $(this).attr("class", "highlight");
+                }
+            }
+            );
+
+            //setInterval("GetSystemInfo()", 1000);
+        });
+
+        //    $(document).scroll ->
+        //nav = $('.navbar')
+        //    return if nav.hasClass('navbar-fixed-top')
+
+        //    if (nav.offset().top - nav.outerHeight() <= $(this).scrollTop())
+        //        nav.addClass('navbar-fixed-top')
+        //    else
+        //        nav.removeClass('navbar-fixed-top')
+    </script>
+</body>
+</html>

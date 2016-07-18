@@ -1,0 +1,101 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+
+
+@model List<FunctionTypeVM>
+@{
+    ViewBag.Title = @Html.MultilingualHtml("FSRPT001");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+@{
+    var exportUrl = Url.Action("Generate", "FSRPT001", new { area = "Reports" });
+}
+
+
+<script type="text/javascript">
+    function getData() {
+        var fromDt = $('#fromDatePickerTB').val();
+        var toDt = $('#toDatePickerTB').val();
+
+
+        return { FromDate: fromDt, ToDate: toDt };
+    }
+</script>
+<fieldset>
+    <legend>
+        <h5>@Html.MultilingualHtml("SearchCriteria")</h5>
+    </legend>
+    @using (Html.BeginForm("Generate", "FSRPT001", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        FunctionTypeVM selectionCriteria = new FunctionTypeVM();
+        if (ViewBag.SelectionCriteria != null)
+        {
+            selectionCriteria = (FunctionTypeVM)ViewBag.SelectionCriteria;
+        }
+        <div class="form-group">
+            <label class="control-label col-md-1" style=" text-align:left;" for="FunctionType">@Html.MultilingualHtml("From")</label>
+            <div class="col-md-2">
+                <div class='input-group date' id='fromDatePicker'>
+                    <input type='text' class="form-control" id="fromDatePickerTB" />
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar">
+                        </span>
+                    </span>
+                </div>
+            </div>
+            <label class="control-label col-md-1" style=" text-align: center;" for="FunctionType">@Html.MultilingualHtml("To")</label>
+            <div class="col-md-2">
+                <div class='input-group date' id='toDatePicker'>
+                    <input type='text' class="form-control" id="toDatePickerTB" />
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar">
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        @*<div class="form-group">
+            <label class="control-label col-md-1" style=" text-align:left;" for="FunctionType">@Html.MultilingualHtml("District")</label>
+            <div class="col-md-5">
+                @Html.DropDownList("DistrictID", (SelectList)ViewBag.DistrictList, new { @class = "form-control" })
+            </div>
+        </div>*@
+
+        <div class="form-group">
+            <div class="col-md-12">
+                @*<input type="button" value="@Html.MultilingualHtml("Generate")" class="btn btn-default">*@
+                <a href='javascript:ExportResult(getData(),"@exportUrl");' class="btn btn-primary" role="button">@Html.MultilingualHtml("Generate")</a>
+            </div>
+        </div>
+
+
+    }
+</fieldset>
+<iframe id="exportIframe" width="100%" height="100%" marginwidth="0" marginheight="0"
+        frameborder="0" scrolling="auto" title="" style="display: none;">
+    Your browser does
+    not support.
+</iframe>
+
+
+
+<br />
+
+<script type="text/javascript">
+    $('#fromDatePicker').datetimepicker({
+        format: "YYYY-M-D"
+    });
+    $('#toDatePicker').datetimepicker({
+        format: "YYYY-M-D"
+    });
+    function DownloadFile(url) {
+        $("#exportIframe").attr("src", url);
+    }
+</script>
+
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>

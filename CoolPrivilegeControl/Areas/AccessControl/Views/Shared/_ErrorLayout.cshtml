@@ -1,0 +1,85 @@
+﻿@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+    <title>@ViewBag.Title</title>
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/Common")
+
+    @Styles.Render("~/Content/css")
+</head>
+<body>
+    <div class="container">
+        @if (TempData.ContainsKey(UI_Infrastructure.Bootstrapper.UserClientSessionKey.ToString()))
+        {
+            @Html.Raw(Html.GenMenuBar(ViewContext.Controller, Context, "/AccessControl/Login/Logout", "/Content/imgs/WellsTechLogo.png"))
+        }
+    </div>
+    <div class="container">
+        @RenderBody()
+    </div>
+
+    @RenderSection("scripts", required: false)
+    <script>
+        function GetSystemInfo() {
+            var str_PostUrl = "@Url.Action("GetCurrentDatetimeAndTotalCount", "Login", null)";
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                url: str_PostUrl,
+                data: "",
+                success: function (response) {
+                    if (response != null && response != undefined && response != "") {
+                        var CurrentInfoVM = $.parseJSON(response);
+                        var currentDt = moment(CurrentInfoVM.CurrDateTime);
+                        $("#DateTimeDiv").text(currentDt.format('dddd, MMMM DD YYYY, hh:mm:ss '));
+                        //$("#TotalVisitedDiv").text("Visited: " + CurrentInfoVM.TotalLoginCount);
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            @{
+                if (ViewBag.ActionMessage != null)
+                {
+                    var msgInfo = ((MsgInfo)ViewBag.ActionMessage);
+
+                    if (msgInfo.MsgType==MessageType.Success)
+                    {
+                        @:ShowMsg(BootstrapDialog.TYPE_SUCCESS, "@Html.Encode(msgInfo.MsgTitle)", "@Html.Raw(CoolUtilities.StringUtility.ReplaceAll(msgInfo.MsgDesc,"'","\'"))");
+                                            }
+                    else
+                    {
+                        @:ShowMsg(BootstrapDialog.TYPE_DANGER, "@Html.Encode(msgInfo.MsgTitle)", "@Html.Raw(CoolUtilities.StringUtility.ReplaceAll(msgInfo.MsgDesc,"'","\'"))");
+                                            }
+
+                    string actionKey = CoolPrivilegeControlVM.CommonVM.StaticContent.ActionMessage_Prefix + "_" + HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+                    if (TempData.ContainsKey(actionKey))
+                    {
+                        TempData.Remove(actionKey);
+                    }
+                }
+             }
+
+            $("table thead tr th[onclick]").hover(function () {
+                $(this).toggleClass("highlight");
+            }, function () {
+                $(this).toggleClass("highlight");
+            }
+            );
+
+            //setInterval("GetSystemInfo()", 1000);
+        });
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+
+@model List<LUserRoleVM>
+
+
+@{
+    PagingInfo RolePagingInfoModel = null;
+
+    if (ViewBag.RolePagingInfoModel != null)
+    {
+        RolePagingInfoModel = (PagingInfo)ViewBag.RolePagingInfoModel;
+    }
+    int preCount = 0;
+
+
+}
+
+@if (RolePagingInfoModel != null && RolePagingInfoModel.Pages != null && RolePagingInfoModel.Pages.Count > 0)
+{
+    preCount = (RolePagingInfoModel.CurrentPage - 1) * RolePagingInfoModel.PageSize;
+    <div class="row col-md-12">
+        <div class="center-block">
+            <ul class="pagination" style="margin: 0px !important; vertical-align: middle;" contenteditable="false">
+
+                @if (RolePagingInfoModel.CurrentPage == 1)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("First")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadRoleList($("#roleListIDList").val(),"1",$("#roleListSort").val(),$("#roleListSortDir").val());'>@Html.MultilingualHtml("First")</a></li>
+                }
+
+                @for (int i = 0; i < RolePagingInfoModel.Pages.Count; ++i)
+                {
+                    string liClass = "";
+
+                    if (i == 0 && RolePagingInfoModel.CurrentPage == 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (RolePagingInfoModel.CurrentPage == RolePagingInfoModel.Pages[i] && i == RolePagingInfoModel.Pages.Count - 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (i != 0 && i != RolePagingInfoModel.Pages.Count - 1 && RolePagingInfoModel.CurrentPage == RolePagingInfoModel.Pages[i])
+                    {
+                        liClass = "active";
+                    }
+
+                    <li class="@Html.Raw(liClass)">
+                        <a href='javascript:LoadRoleList($("#roleListIDList").val(),"@RolePagingInfoModel.Pages[i].ToString()",$("#roleListSort").val(),$("#roleListSortDir").val());'>
+                            @if (i == 0)
+                            {
+                                @Html.MultilingualHtml("Prev");
+                            }
+                            else if (i == RolePagingInfoModel.Pages.Count - 1)
+                            {
+                                @Html.MultilingualHtml("Next");
+                            }
+                            else
+                            {
+                                @Html.Raw((RolePagingInfoModel.Pages[i]).ToString());
+                            }
+                        </a>
+                    </li>
+                }
+
+                @if (RolePagingInfoModel.CurrentPage == RolePagingInfoModel.TotalPage)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("Last")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadRoleList($("#roleListIDList").val(),"@RolePagingInfoModel.TotalPage",$("#roleListSort").val(),$("#roleListSortDir").val());'>@Html.MultilingualHtml("Last")</a></li>
+                }
+
+            </ul>
+        </div>
+    </div>
+}
+<div class="row col-md-12">
+    &nbsp;
+</div>
+<div class="row col-md-12">
+    <div class="table-responsive">
+        <table class="table table-striped fa-border table-hover" contenteditable="false">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th align="left" style="text-align:left;">@Html.MultilingualHtml("RoleName")</th>
+                    <th align="left" style="text-align:left;">@Html.MultilingualHtml("Operation")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    for (int i = 0; i < Model.Count; ++i)
+                    {
+                        <tr>
+                            <td class="vert-align">@Convert.ToInt32(i + 1 + preCount)</td>
+                            <td align="left" class="vert-align">
+                                @Html.ActionLink(Model[i].RoleName, "Edit", "LURoleManage", new { area = "AccessControl", guid = Model[i].ID }, null)
+                            </td>
+                            <td align="center" width="90px"><a class="btn btn-danger" href='javascript:DeleteRole("@Model[i].ID");'><i class="fa fa-trash-o fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (RolePagingInfoModel != null && RolePagingInfoModel.Pages != null && RolePagingInfoModel.Pages.Count > 0)
+{
+    preCount = (RolePagingInfoModel.CurrentPage - 1) * RolePagingInfoModel.PageSize;
+    <div class="row col-md-12">
+        <div class="center-block">
+            <ul class="pagination" style="margin: 0px !important; vertical-align: middle;" contenteditable="false">
+
+                @if (RolePagingInfoModel.CurrentPage == 1)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("First")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadRoleList($("#roleListIDList").val(),"1",$("#roleListSort").val(),$("#roleListSortDir").val());'>@Html.MultilingualHtml("First")</a></li>
+                }
+
+                @for (int i = 0; i < RolePagingInfoModel.Pages.Count; ++i)
+                {
+                    string liClass = "";
+
+                    if (i == 0 && RolePagingInfoModel.CurrentPage == 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (RolePagingInfoModel.CurrentPage == RolePagingInfoModel.Pages[i] && i == RolePagingInfoModel.Pages.Count - 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (i != 0 && i != RolePagingInfoModel.Pages.Count - 1 && RolePagingInfoModel.CurrentPage == RolePagingInfoModel.Pages[i])
+                    {
+                        liClass = "active";
+                    }
+
+                    <li class="@Html.Raw(liClass)">
+                        <a href='javascript:LoadRoleList($("#roleListIDList").val(),"@RolePagingInfoModel.Pages[i].ToString()",$("#roleListSort").val(),$("#roleListSortDir").val());'>
+                            @if (i == 0)
+                            {
+                                @Html.MultilingualHtml("Prev");
+                            }
+                            else if (i == RolePagingInfoModel.Pages.Count - 1)
+                            {
+                                @Html.MultilingualHtml("Next");
+                            }
+                            else
+                            {
+                                @Html.Raw((RolePagingInfoModel.Pages[i]).ToString());
+                            }
+                        </a>
+                    </li>
+                }
+
+                @if (RolePagingInfoModel.CurrentPage == RolePagingInfoModel.TotalPage)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("Last")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadRoleList($("#roleListIDList").val(),"@RolePagingInfoModel.TotalPage",$("#roleListSort").val(),$("#roleListSortDir").val());'>@Html.MultilingualHtml("Last")</a></li>
+                }
+
+            </ul>
+        </div>
+    </div>
+}

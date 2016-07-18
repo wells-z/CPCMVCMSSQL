@@ -1,0 +1,187 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+
+@model List<LUserAccessByOrgVM>
+
+
+@{
+    PagingInfo OrgPagingInfoModel = null;
+
+    if (ViewBag.OrgPagingInfoModel != null)
+    {
+        OrgPagingInfoModel = (PagingInfo)ViewBag.OrgPagingInfoModel;
+    }
+    int preCount = 0;
+}
+
+@if (OrgPagingInfoModel != null && OrgPagingInfoModel.Pages != null && OrgPagingInfoModel.Pages.Count > 0)
+{
+    preCount = (OrgPagingInfoModel.CurrentPage - 1) * OrgPagingInfoModel.PageSize;
+    <div class="row col-md-12">
+        <div class="center-block">
+            <ul class="pagination" style="margin: 0px !important; vertical-align: middle;" contenteditable="false">
+
+                @if (OrgPagingInfoModel.CurrentPage == 1)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("First")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadOrgList($("#orgListIDList").val(),$("#orgDetailsIDList").val(),"1",$("#orgListSort").val(),$("#orgListSortDir").val());'>@Html.MultilingualHtml("First")</a></li>
+                }
+
+                @for (int i = 0; i < OrgPagingInfoModel.Pages.Count; ++i)
+                {
+                    string liClass = "";
+
+                    if (i == 0 && OrgPagingInfoModel.CurrentPage == 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (OrgPagingInfoModel.CurrentPage == OrgPagingInfoModel.Pages[i] && i == OrgPagingInfoModel.Pages.Count - 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (i != 0 && i != OrgPagingInfoModel.Pages.Count - 1 && OrgPagingInfoModel.CurrentPage == OrgPagingInfoModel.Pages[i])
+                    {
+                        liClass = "active";
+                    }
+
+                    <li class="@Html.Raw(liClass)">
+                        <a href='javascript:LoadOrgList($("#orgListIDList").val(),$("#orgDetailsIDList").val(),"@OrgPagingInfoModel.Pages[i].ToString()",$("#orgListSort").val(),$("#orgListSortDir").val());'>
+                            @if (i == 0)
+                            {
+                                @Html.MultilingualHtml("Prev");
+                            }
+                            else if (i == OrgPagingInfoModel.Pages.Count - 1)
+                            {
+                                @Html.MultilingualHtml("Next");
+                            }
+                            else
+                            {
+                                @Html.Raw((OrgPagingInfoModel.Pages[i]).ToString());
+                            }
+                        </a>
+                    </li>
+                }
+
+                @if (OrgPagingInfoModel.CurrentPage == OrgPagingInfoModel.TotalPage)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("Last")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadOrgList($("#orgListIDList").val(),$("#orgDetailsIDList").val(),"@OrgPagingInfoModel.TotalPage",$("#orgListSort").val(),$("#orgListSortDir").val());'>@Html.MultilingualHtml("Last")</a></li>
+                }
+
+            </ul>
+        </div>
+    </div>
+}
+<div class="row col-md-12">
+    &nbsp;
+</div>
+<div class="row col-md-12">
+    <div class="table-responsive">
+        <table class="table table-striped fa-border table-hover" contenteditable="false">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th align="left" style="text-align:left;">@Html.MultilingualHtml("OrganizationKey")</th>
+                    <th align="left" style="text-align:left;">@Html.MultilingualHtml("OrganizationName")</th>
+                    <th align="left" style="text-align:left;">@Html.MultilingualHtml("OrgDetailsKey")</th>
+                    <th align="left" style="text-align:left;">@Html.MultilingualHtml("OrgDetailsType")</th>
+                    <th align="left" style="text-align:left;">@Html.MultilingualHtml("Operation")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    for (int i = 0; i < Model.Count; ++i)
+                    {
+                        <tr>
+                            <td class="vert-align">@Convert.ToInt32(i + 1 + preCount)</td>
+                            <td align="left" class="vert-align">
+                                @Html.ActionLink(Model[i].OrganizationKey, "Edit", "LUOrganizationManage", new { area = "AccessControl", guid = Model[i].UA_Org_ID }, null)
+                            </td>
+                            <td align="left" class="vert-align">@Model[i].OrganizationName</td>
+                            <td align="left" class="vert-align">
+                                @Html.ActionLink(Model[i].OrgDetailsKey, "Edit", "LUOrgDetailsManage", new { area = "AccessControl", guid = Model[i].UA_OrgD_ID }, null)
+                            </td>
+                            <td align="left" class="vert-align">
+                                @Model[i].OrgDetailsTypeName
+                            </td>
+                            <td align="center" width="90px"><a class="btn btn-danger" href='javascript:DeleteOrg("@Model[i].UA_Org_ID","@Model[i].UA_OrgD_ID");'><i class="fa fa-trash-o fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (OrgPagingInfoModel != null && OrgPagingInfoModel.Pages != null && OrgPagingInfoModel.Pages.Count > 0)
+{
+    preCount = (OrgPagingInfoModel.CurrentPage - 1) * OrgPagingInfoModel.PageSize;
+    <div class="row col-md-12">
+        <div class="center-block">
+            <ul class="pagination" style="margin: 0px !important; vertical-align: middle;" contenteditable="false">
+
+                @if (OrgPagingInfoModel.CurrentPage == 1)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("First")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadOrgList($("#orgListIDList").val(),$("#orgDetailsIDList").val(),"1",$("#orgListSort").val(),$("#orgListSortDir").val());'>@Html.MultilingualHtml("First")</a></li>
+                }
+
+                @for (int i = 0; i < OrgPagingInfoModel.Pages.Count; ++i)
+                {
+                    string liClass = "";
+
+                    if (i == 0 && OrgPagingInfoModel.CurrentPage == 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (OrgPagingInfoModel.CurrentPage == OrgPagingInfoModel.Pages[i] && i == OrgPagingInfoModel.Pages.Count - 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (i != 0 && i != OrgPagingInfoModel.Pages.Count - 1 && OrgPagingInfoModel.CurrentPage == OrgPagingInfoModel.Pages[i])
+                    {
+                        liClass = "active";
+                    }
+
+                    <li class="@Html.Raw(liClass)">
+                        <a href='javascript:LoadOrgList($("#orgListIDList").val(),$("#orgDetailsIDList").val(),"@OrgPagingInfoModel.Pages[i].ToString()",$("#orgListSort").val(),$("#orgListSortDir").val());'>
+                            @if (i == 0)
+                            {
+                                @Html.MultilingualHtml("Prev");
+                            }
+                            else if (i == OrgPagingInfoModel.Pages.Count - 1)
+                            {
+                                @Html.MultilingualHtml("Next");
+                            }
+                            else
+                            {
+                                @Html.Raw((OrgPagingInfoModel.Pages[i]).ToString());
+                            }
+                        </a>
+                    </li>
+                }
+
+                @if (OrgPagingInfoModel.CurrentPage == OrgPagingInfoModel.TotalPage)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("Last")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadOrgList($("#orgListIDList").val(),$("#orgDetailsIDList").val(),"@OrgPagingInfoModel.TotalPage",$("#orgListSort").val(),$("#orgListSortDir").val());'>@Html.MultilingualHtml("Last")</a></li>
+                }
+
+            </ul>
+        </div>
+    </div>
+}

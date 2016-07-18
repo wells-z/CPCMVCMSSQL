@@ -1,0 +1,80 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+
+@model CoolPrivilegeControlVM.EntityVM.LUserOrganizationVM
+@{
+    ViewBag.Title = @Html.MultilingualHtml("LUOrganizationManage_Edit");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+@Scripts.Render("~/bundles/AccConCommonFuns")
+
+
+
+@using (Html.BeginForm("Edit", "LUOrganizationManage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(model => model.Timestamp)
+    @Html.HiddenFor(model => model.ID)
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("OrganizationPath")</label>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.OrganizationPath, new { @class = "form-control" })
+                </div>
+            </div>
+
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("OrganizationKey")</label>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.OrganizationKey, new { @class = "form-control" })
+                </div>
+            </div>
+
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("OrganizationStatus")</label>
+                <div class="controls col-md-4">
+                    <label class="radio-inline">
+                        @Html.RadioButtonFor(model => model.OrganizationStatus, 1) @Html.MultilingualHtml("Active")
+                    </label>
+                    <label class="radio-inline">
+                        @Html.RadioButtonFor(model => model.OrganizationStatus, 2) @Html.MultilingualHtml("InActive")
+                    </label>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-1">
+            <input type="submit" value="@Html.MultilingualHtml("Save")" class="btn btn-primary" onclick="OpenLoadingDialog()">
+        </div>
+
+        @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, "LUOrganizationManage", "Delete"))
+        {
+            var deleteURL = Url.Action("Delete", "LUOrganizationManage", new { area = "AccessControl", guid = Model.ID });
+            var detailsURL = Url.Action("Edit", "LUOrganizationManage", new { area = "AccessControl", guid = Model.ID });
+            var data = Html.Raw("{ID:\"" + @Model.ID + "\"}");
+
+            <div class="col-md-1">
+                <a class="btn btn-danger" href='javascript:InvokeDeleteFunction_ByAjax(@data,"@deleteURL","@detailsURL");'><i class="fa fa-trash-o fa-fw"></i> @Html.MultilingualHtml("Delete")</a>
+            </div>
+        }
+
+        <div class="col-md-1">
+            <a href="@Url.Action("Index", "LUOrganizationManage", null)" class="btn btn-default" role="button">@Html.MultilingualHtml("BacktoList")</a>
+        </div>
+    </div>
+}
+
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<script type="text/javascript">
+</script>

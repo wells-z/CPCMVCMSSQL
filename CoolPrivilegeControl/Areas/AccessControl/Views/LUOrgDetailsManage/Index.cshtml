@@ -1,0 +1,199 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+
+@model List<LUserOrgDetailsVM>
+@{
+    string str_LUOrgDetailsManageKey = "LUOrgDetailsManage";
+
+    ViewBag.Title = @Html.MultilingualHtml(str_LUOrgDetailsManageKey);
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    PagingInfo PagingInfoModel = null;
+
+    if (ViewBag.PagingInfoModel != null)
+    {
+        PagingInfoModel = (PagingInfo)ViewBag.PagingInfoModel;
+    }
+    int preCount = 0;
+
+    string sortName = "";
+    string sortDir = "";
+
+    if (HttpContext.Current.Request.QueryString.AllKeys.Contains("sort"))
+    {
+        sortName = HttpContext.Current.Request.QueryString["sort"];
+    }
+
+    if (HttpContext.Current.Request.QueryString.AllKeys.Contains("sortDir"))
+    {
+        sortDir = HttpContext.Current.Request.QueryString["sortDir"];
+    }
+}
+
+
+
+<fieldset>
+    <legend>
+        <h5>@Html.MultilingualHtml("SearchCriteria")</h5>
+    </legend>
+    @using (Html.BeginForm("Index", str_LUOrgDetailsManageKey, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        LUserOrgDetailsVM selectionCriteria = new LUserOrgDetailsVM();
+        if (ViewBag.SelectionCriteria != null)
+        {
+            selectionCriteria = (LUserOrgDetailsVM)ViewBag.SelectionCriteria;
+        }
+        <div class="form-group">
+            <label class="control-label col-md-2" style=" text-align:left;" for="OrganizationPath">@Html.MultilingualHtml("Key")</label>
+            <div class="col-md-4">
+                @Html.TextBox("OrgDetailsKey", selectionCriteria.OrgDetailsKey, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2" style=" text-align:left;" for="RoleName">@Html.MultilingualHtml("Type")</label>
+            <div class="col-md-6">
+                <label class="radio-inline">
+                    <input type="radio" id="OrgDetailsType" name="OrgDetailsType" value="" @{if (!selectionCriteria.OrgDetailsType.HasValue) { <text> checked='checked' </text>                } } />
+                    @Html.MultilingualHtml("All")
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" id="OrgDetailsType" name="OrgDetailsType" value="1" onclick="ChangeOrgDetailsType(this);"
+                           @{if (selectionCriteria.OrgDetailsType.HasValue && selectionCriteria.OrgDetailsType == 1) { <text> checked='checked' </text>                } } /> @Html.MultilingualHtml("SpecificFunctions")
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" id="OrgDetailsType" name="OrgDetailsType" value="2" onclick="ChangeOrgDetailsType(this);"
+                               @{if (selectionCriteria.OrgDetailsType.HasValue && selectionCriteria.OrgDetailsType == 2) { <text> checked='checked' </text>                 } } /> @Html.MultilingualHtml("AsRoleSetting")
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" id="RoleContent">
+                    <label class="control-label col-md-2" style=" text-align:left;" for="RoleName">@Html.MultilingualHtml("RoleName")</label>
+                    <div class="col-md-4">
+                        @Html.TextBox("SC_RoleName", selectionCriteria.SC_RoleName, new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <input type="submit" value="@Html.MultilingualHtml("Search")" class="btn btn-default" onclick="OpenLoadingDialog()">
+                    </div>
+                </div>
+    }
+</fieldset>
+@Html.Raw(Html.CPaging("Index", str_LUOrgDetailsManageKey, PagingInfoModel, "AccessControl", sortName, sortDir))
+<div class="row col-md-12">
+    &nbsp;
+</div>
+<div class="row col-md-12">
+    <div class="table-responsive">
+        <table class="table table-striped fa-border table-hover" contenteditable="false">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "OrgDetailsKey")' id="OrgDetailsKeyTH">@Html.MultilingualHtml("OrgDetailsKey")</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "OrgDetailsTypeName")' id="OrgDetailsTypeNameTH">@Html.MultilingualHtml("OrgDetailsType")</th>
+                    <th align="center" style="text-align:center;">@Html.MultilingualHtml("RoleName")</th>
+                    <th colspan="2" align="center" style="text-align:center;">@Html.MultilingualHtml("Operation")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    for (int i = 0; i < Model.Count; ++i)
+                    {
+                        var deleteURL = Url.Action("Delete", str_LUOrgDetailsManageKey, new { area = "AccessControl", guid = Model[i].ID });
+                        var detailsURL = Url.Action("Edit", str_LUOrgDetailsManageKey, new { area = "AccessControl", guid = Model[i].ID });
+                        var data = Html.Raw("{ID:\"" + @Model[i].ID + "\"}");
+
+                        List<string> strList_RoleLink = new List<string>();
+                        foreach (var item in Model[i].EntityList_Role)
+                        {
+                            strList_RoleLink.Add(Html.ActionLink(item.RoleName, "Edit", "LURoleManage", new { area = "AccessControl", guid = item.ID }, null).ToString());
+                        }
+                        string str_RoleLink = "";
+
+                        if (strList_RoleLink.Count > 0)
+                        {
+                            str_RoleLink = strList_RoleLink.Aggregate((first, next) =>
+                            {
+                                return first + "," + next;
+                            });
+                        }
+                        <tr>
+                            <td class="vert-align">@Convert.ToInt32(i + 1 + preCount)</td>
+                            <td align="center" class="vert-align">@Model[i].OrgDetailsKey</td>
+                            <td align="center" class="vert-align">@Model[i].OrgDetailsTypeName</td>
+                            <td align="center" class="vert-align">@Html.Raw(str_RoleLink)</td>
+                            @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, str_LUOrgDetailsManageKey, "Edit"))
+                            {
+                                <td align="center" width="70px"><a class="btn btn-default" href='@detailsURL'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Edit")</a></td>
+                            }
+                            else
+                            {
+                                <td align="center" width="70px"><a class="btn btn-default disabled" href='#'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Edit")</a></td>
+                            }
+
+                            @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, str_LUOrgDetailsManageKey, "Delete"))
+                            {
+                                <td align="center" width="70px"><a class="btn btn-danger" href='javascript:InvokeDeleteFunction_ByAjax(@data,"@deleteURL","@detailsURL");'><i class="fa fa-trash-o fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                            }
+                            else
+                            {
+                                <td align="center" width="70px"><a class="btn btn-danger disabled" href='#'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@Html.Raw(Html.CPaging("Index", str_LUOrgDetailsManageKey, PagingInfoModel, "AccessControl", sortName, sortDir))
+<br />
+<div class="row">
+    <div class="col-md-12">
+        @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, str_LUOrgDetailsManageKey, "Create"))
+        {
+            <a href=@Url.Action("Create", str_LUOrgDetailsManageKey, null) class="btn btn-default" role="button">@Html.MultilingualHtml(str_LUOrgDetailsManageKey + "_Create")</a>
+        }
+    </div>
+</div>
+
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<script>
+    function ChangeOrgDetailsType(sender) {
+        var OrgDetailsType = 0;
+        if (sender != null && sender != undefined) {
+            if ($(sender).is(':checked')) {
+                OrgDetailsType = $(sender).val();
+            }
+        }
+        else {
+            OrgDetailsType = $('input[name=OrgDetailsType]').filter(':checked').val();
+        }
+        if (OrgDetailsType == 2) {
+            $("#RoleContent").show();
+        }
+        else if (OrgDetailsType == 1) {
+            $("#RoleContent").hide();
+        }
+        else {
+            $("#RoleContent").hide();
+        }
+    }
+
+    $(document).ready(function () {
+        findSortingTh("OrgDetailsKeyTH", "asc");
+        ChangeOrgDetailsType();
+    });
+</script>

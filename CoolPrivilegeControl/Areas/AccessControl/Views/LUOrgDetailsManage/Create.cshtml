@@ -1,0 +1,202 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+
+@model CoolPrivilegeControlVM.EntityVM.LUserOrgDetailsVM
+@{
+    string str_LUOrgDetailsManageKey = "LUOrgDetailsManage";
+
+    ViewBag.Title = @Html.MultilingualHtml(str_LUOrgDetailsManageKey + "_Create");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+@Scripts.Render("~/bundles/AccConCommonFuns")
+
+
+
+@using (Html.BeginForm("Create", str_LUOrgDetailsManageKey, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("Key")</label>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.OrgDetailsKey, new { @class = "form-control" })
+                </div>
+            </div>
+
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("Type")</label>
+                <div class="controls col-md-6">
+                    <label class="radio-inline">
+                        @Html.RadioButtonFor(model => model.OrgDetailsType, 1, new { @onclick = "ChangeOrgDetailsType(this);" }) @Html.MultilingualHtml("SpecificFunctions")
+                    </label>
+                    <label class="radio-inline">
+                        @Html.RadioButtonFor(model => model.OrgDetailsType, 2, new { @onclick = "ChangeOrgDetailsType(this);" }) @Html.MultilingualHtml("AsRoleSetting")
+                    </label>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="RoleContent" class="col-md-10 col-centered">
+        <fieldset>
+            <legend>
+                @Html.MultilingualHtml("RoleSettings")
+            </legend>
+            <div id="RoleList">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="control-label col-md-4">@Html.MultilingualHtml("RoleName")</label>
+                    <div class="col-md-4">
+                        @Html.DropDownList("RoleID", (SelectList)ViewBag.RoleList, new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-md-4">&nbsp;</label>
+                    <div class="col-md-4">
+                        <input type="button" value="@Html.MultilingualHtml("Add")" class="btn btn-default" onclick="AddRole();">
+                        @Html.Hidden("roleListIDList")
+                        @Html.Hidden("roleListPage")
+                        @Html.Hidden("roleListSort")
+                        @Html.Hidden("roleListSortDir")
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+
+    <div id="FDContent" class="col-md-10 col-centered">
+        <fieldset>
+            <legend>
+                @Html.MultilingualHtml("AccessPrivilege")
+            </legend>
+            <div id="FunList">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionName")</label>
+                    <div class="col-md-4">
+                        @Html.DropDownList("FunID", (SelectList)ViewBag.FunIDs, new { @class = "form-control", @onchange = "LoadFunctionType(this.value)" })
+                    </div>
+                </div>
+
+                <div class="form-group" id="FunTypesGroup">
+                    <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionType")</label>
+                    <div class="col-md-4">
+                        <table class="table table-striped" contenteditable="false">
+                            <thead>
+                                <tr>
+                                    <th align="center" style="text-align:center; width:60px;"><input type="checkbox" value="" id="FTCheckAll"></th>
+                                    <th align="left" style="text-align:left;">@Html.MultilingualHtml("FunctionType")</th>
+                                </tr>
+                            </thead>
+                            <tbody id="FunTypesList"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">&nbsp;</label>
+                    <div class="col-md-4">
+                        <input type="button" id="FunBtn_Add" value="@Html.MultilingualHtml("Add")" class="btn btn-default" onclick="AddFunDetail();">
+                        <input type="button" id="FunBtn_Edit" value="@Html.MultilingualHtml("Save")" class="btn btn-default" onclick="SaveFunDetail();">
+                        @Html.Hidden("funDListJson")
+                        @Html.Hidden("funDListPage")
+                        @Html.Hidden("funDListSort")
+                        @Html.Hidden("funDListSortDir")
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+
+    <div class="row">
+        <div class="col-md-1">
+            <input type="submit" value="@Html.MultilingualHtml("Save")" class="btn btn-primary" onclick="OpenLoadingDialog()">
+        </div>
+        <div class="col-md-1">
+            <a href="@Url.Action("Index", str_LUOrgDetailsManageKey, null)" class="btn btn-default" role="button">@Html.MultilingualHtml("BacktoList")</a>
+        </div>
+    </div>
+    
+    <div id="loader_TypeKey" style="display:none;">OrgDetailsType</div>
+    
+    <div id="loader_RoleList" data-request-url="@Url.Action("Index_RoleList", "LoginUserManage")" style="display:none;"></div>
+    <div id="loader_FTList" data-request-url="@Url.Action("GetFTList", "LoginUserManage")" style="display:none;"></div>
+    <div id="loader_FDList" data-request-url="@Url.Action("Index_FDList", "LoginUserManage")" style="display:none;"></div>
+}
+
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<script type="text/javascript">
+    var CurrentFunDetailInfo;
+
+    function ChangeOrgDetailsType(sender) {
+        var OrgDetailsType = 0;
+        if (sender != null && sender != undefined) {
+            if ($(sender).is(':checked')) {
+                OrgDetailsType = $(sender).val();
+            }
+        }
+        else {
+            OrgDetailsType = $('input[name=OrgDetailsType]').filter(':checked').val();
+        }
+        if (OrgDetailsType == 2) {
+            $("#FDContent").hide();
+            $("#RoleContent").show();
+        }
+        else if (OrgDetailsType == 1) {
+            $("#FDContent").show();
+            $("#RoleContent").hide();
+        }
+        else {
+            $("#FDContent").hide();
+            $("#RoleContent").hide();
+        }
+    }
+
+    $(document).ready(function () {
+        var roleListIDList = $("#roleListIDList").val();
+        var roleListPage = $("#roleListPage").val();
+        var roleListSort = $("#roleListSort").val();
+        var roleListSortDir = $("#roleListSortDir").val();
+        LoadRoleList(roleListIDList, roleListPage, roleListSort, roleListSortDir, "OrgDetailsType");
+
+        var FunDetailInfoList_Str = $("#funDListJson").val();
+        var funDListPage = $("#funDListPage").val();
+        var funDListSort = $("#funDListSort").val();
+        var funDListSortDir = $("#funDListSortDir").val();
+
+        if (FunDetailInfoList_Str != "" && FunDetailInfoList_Str != undefined) {
+            LoadFunDList(FunDetailInfoList_Str, funDListPage, funDListSort, funDListSortDir);
+        }
+
+        $("#FunTypesGroup").hide();
+        $("#FunBtn_Edit").hide();
+        $("#FunBtn_Add").show();
+
+        $("input[type='checkbox'][id=FTCheckAll]").click(function () {
+            var isChecked = $(this).is(':checked');
+            $.each($("input[type='checkbox'][id^=FunctionTypeCB_]"), function (index, item) {
+                if (CurrentFunDetailInfo != null && CurrentFunDetailInfo != undefined) {
+                    for (var i = 0; i < CurrentFunDetailInfo.FDSelected.length; ++i) {
+                        CurrentFunDetailInfo.FDSelected[i] = isChecked;
+                    }
+                }
+                $(item).prop('checked', isChecked);
+            });
+
+        });
+
+        ChangeOrgDetailsType();
+    });
+</script>

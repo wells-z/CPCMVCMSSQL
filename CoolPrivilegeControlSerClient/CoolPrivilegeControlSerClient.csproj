@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3C5390E7-CFB8-44D1-B2DC-F2E48D86C8BA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CoolPrivilegeControlSerClient</RootNamespace>
+    <AssemblyName>CoolPrivilegeControlSerClient</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CoolPrivilegeControlVM, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Lib\CoolPrivilegeControlVM.dll</HintPath>
+    </Reference>
+    <Reference Include="CoolUtilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Lib\CoolUtilities.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WCF_Infrastructure, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Lib\WCF_Infrastructure.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AuditLogMgtHelper.cs" />
+    <Compile Include="AuthHisMgtHelper.cs" />
+    <Compile Include="CheckPrivilegeHelper.cs" />
+    <Compile Include="FunMgtHelper.cs" />
+    <Compile Include="FunTypeMgtHelper.cs" />
+    <Compile Include="LoginUserMgtHelper.cs" />
+    <Compile Include="OrgDetailMgtHelper.cs" />
+    <Compile Include="OrgMgtHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RoleMgtHelper.cs" />
+    <Compile Include="SystemMgtHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CoolPrivilegeControlSerFactory\CoolPrivilegeControlSerFactory.csproj">
+      <Project>{2b2a8e12-184f-4773-a258-b197f6153b9c}</Project>
+      <Name>CoolPrivilegeControlSerFactory</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CoolPrivilegeControlService\CoolPrivilegeControlService.csproj">
+      <Project>{08a727bf-5e60-46c4-bd38-6a9128bb669f}</Project>
+      <Name>CoolPrivilegeControlService</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.EntityVM.AuthorizedInfoVM.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.EntityVM.FunctionTypeVM.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.EntityVM.FunctionVM.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.EntityVM.FunDetailInfo.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.EntityVM.LUserAccessByOrgVM.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.EntityVM.LUserOrganizationVM.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.EntityVM.LUserOrgDetailsVM.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.EntityVM.LUserRoleVM.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.EntityVM.SystemInfoVM.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.AuditLogSerVM.ALSerListResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.AuthorizedMgtSerVM.AHSerListResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.FunSerVM.FSerEditResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.FunSerVM.FSerListResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.FunTypeSerVM.FTSerEditResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.FunTypeSerVM.FTSerListResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.LoginUserSerVM.LUSerEditResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.LoginUserSerVM.LUSerLoginResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.LUSerListResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.OrgDetailsSerVM.ODSerEditResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.OrgDetailsSerVM.ODSerListResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.OrgSerVM.OrgSerEditResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.OrgSerVM.OrgSerListResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.RoleSerVM.RoleSerEditResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.RoleSerVM.RoleSerListResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WCFVM.WCFReturnResult.datasource" />
+    <None Include="Properties\DataSources\CoolPrivilegeControlVM.WEBVM.MVCSession.datasource" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

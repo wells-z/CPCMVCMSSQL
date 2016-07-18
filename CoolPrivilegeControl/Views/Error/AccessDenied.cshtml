@@ -1,0 +1,14 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+
+@{
+    ViewBag.Title = "AccessDenied";
+    Layout = "~/Areas/AccessControl/Views/Shared/_ErrorLayout.cshtml";
+}
+
+<div class="jumbotron">
+    <h2>Access Denied</h2>
+    <h3>You might not have permission to view this directory or page using the credentials you supplied. <br />If you believe you should be able to view this directory or page, please contact your system administrator.</h3>
+    <h4>Please click <a href="@Url.Action("Index", "Login", new { area = "AccessControl" })" class="btn btn-default">here</a> to go back to the login page.</h4>
+</div>

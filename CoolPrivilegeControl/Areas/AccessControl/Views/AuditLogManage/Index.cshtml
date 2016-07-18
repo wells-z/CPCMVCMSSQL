@@ -1,0 +1,232 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+
+@model List<AuditLogVM>
+@{
+    ViewBag.Title = @Html.MultilingualHtml("AuditLogManage");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    PagingInfo PagingInfoModel = null;
+
+    if (ViewBag.PagingInfoModel != null)
+    {
+        PagingInfoModel = (PagingInfo)ViewBag.PagingInfoModel;
+    }
+
+    string sortName = "";
+    string sortDir = "";
+
+    if (HttpContext.Current.Request.QueryString.AllKeys.Contains("sort"))
+    {
+        sortName = HttpContext.Current.Request.QueryString["sort"];
+    }
+
+    if (HttpContext.Current.Request.QueryString.AllKeys.Contains("sortDir"))
+    {
+        sortDir = HttpContext.Current.Request.QueryString["sortDir"];
+    }
+
+    var datat = Html.Raw("{sort:\"" + sortName + "\",sortDir:\"" + sortDir + "\"}");
+
+    var exportUrl = Url.Action("Export", "AuditLogManage", new { area = "AccessControl" });
+}
+
+
+
+<fieldset>
+    <legend>
+        <h5>@Html.MultilingualHtml("SearchCriteria")</h5>
+    </legend>
+    @using (Html.BeginForm("Index", "AuditLogManage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        AuditLogVM selectionCriteria = new AuditLogVM();
+        if (ViewBag.SelectionCriteria != null)
+        {
+            selectionCriteria = (AuditLogVM)ViewBag.SelectionCriteria;
+        }
+        else
+        {
+            selectionCriteria.DateFrom = null;
+            selectionCriteria.DateTo = null;
+        }
+        <div class="form-group">
+            <label class="control-label col-md-2" style=" text-align:left;" for="LoginName">@Html.MultilingualHtml("Operator")</label>
+            <div class="col-md-4">
+                @Html.TextBox("Operator", selectionCriteria.Operator, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2" style=" text-align:left;" for="RoleName">@Html.MultilingualHtml("OperationType")</label>
+            <div class="col-md-4">
+                @Html.TextBox("AL_EventType", selectionCriteria.AL_EventType, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2" style=" text-align:left;" for="DateFrom">@Html.MultilingualHtml("Operation") @Html.MultilingualHtml("Date") @Html.MultilingualHtml("From")</label>
+            <div class="col-md-2">
+                <div class='input-group date' id='DateFromDiv'>
+                    <input type='text' class="form-control" id="DateFrom" name="DateFrom" value="@(selectionCriteria.DateFrom.HasValue ? selectionCriteria.DateFrom.Value.ToString(((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).DateFormat) : "")" />
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar">
+                        </span>
+                    </span>
+                </div>
+            </div>
+            <label class="control-label col-md-1" style=" text-align: center;" for="DateTo">@Html.MultilingualHtml("To")</label>
+            <div class="col-md-2">
+                <div class='input-group date' id='DateToDiv'>
+                    <input type='text' class="form-control" id="DateTo" name="DateTo" value="@(selectionCriteria.DateTo.HasValue ? selectionCriteria.DateTo.Value.ToString(((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).DateFormat) : "")" />
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar">
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-12">
+                <input type="submit" value="@Html.MultilingualHtml("Search")" class="btn btn-default" onclick="OpenLoadingDialog()">
+            </div>
+        </div>
+    }
+</fieldset>
+@Html.Raw(Html.CPaging("Index", "AuditLogManage", PagingInfoModel, "AccessControl", sortName, sortDir))
+
+<div class="row col-md-12">
+    &nbsp;
+</div>
+<div class="row col-md-12">
+    <div class="table-responsive">
+        <table class="table table-striped fa-border table-hover" contenteditable="false">
+            <thead>
+                <tr>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "Operator")' id="OperatorTH">@Html.MultilingualHtml("Operator")</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "AL_CreateDate")' id="AL_CreateDateTH">@Html.MultilingualHtml("Date")</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "AL_TableName")' id="AL_TableNameTH">@Html.MultilingualHtml("TableName")</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "AL_EventType")' id="AL_EventTypeTH">@Html.MultilingualHtml("OperationType")</th>
+                    <th align="center" style="text-align:center;">@Html.MultilingualHtml("OriginalValue")</th>
+                    <th align="center" style="text-align:center;">@Html.MultilingualHtml("NewValue")</th>
+                    <th align="center" style="text-align:center;">@Html.MultilingualHtml("RecordKey")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    for (int i = 0; i < Model.Count; ++i)
+                    {
+                        //var deleteURL = Url.Action("delete", "AuditLogManage", new { area = "AccessControl", guid = Model[i].ID });
+                        //var detailsURL = Url.Action("edit", "AuditLogManage", new { area = "AccessControl", guid = Model[i].ID });
+                        var data = Html.Raw("{ID:\"" + @Model[i].ID + "\"}");
+                        <tr>
+                            <td align="center" width="100x">@Model[i].Operator</td>
+                            <td align="center" width="150px">@Model[i].AL_CreateDate.Value.ToString((((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).DateFormat + " " + ((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).TimeFormat))</td>
+                            <td align="center" width="150px">@Model[i].AL_TableName</td>
+                            <td align="center" width="120x">@Model[i].AL_EventType</td>
+                            <td align="center">
+                                @if (Model[i].AL_OriginalValue != "" && Model[i].AL_OriginalValue != null)
+                                {
+                                    <a href='javascript:ShowDetailsInfo("@Html.MultilingualHtml("OriginalValue")","@Model[i].AL_OriginalValue")'>@Html.MultilingualHtml("ClickToViewDetails")</a>
+                                }
+                            </td>
+                            <td align="center">
+                                @if (Model[i].AL_NewValue != "" && Model[i].AL_NewValue != null)
+                                {
+                                    <a href='javascript:ShowDetailsInfo("@Html.MultilingualHtml("NewValue")","@Model[i].AL_NewValue")'>@Html.MultilingualHtml("ClickToViewDetails")</a>
+                                }
+                            </td>
+                            <td align="left">@Model[i].AL_RecordKey</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@Html.Raw(Html.CPaging("Index", "AuditLogManage", PagingInfoModel, "AccessControl", sortName, sortDir))
+
+<br />
+
+<div class="row">
+    <div class="col-md-1">
+        <a href='javascript:ExportResult(@datat,"@exportUrl");' class="btn btn-primary" role="button">@Html.MultilingualHtml("AuditLogManage_Export")</a>
+    </div>
+</div>
+
+<div id="dialog">
+    <iframe id="exportIframe" marginwidth="0" marginheight="0" frameborder="0" scrolling="auto" title="" style="display: none; width:100%; height:100%;">
+        Your browser does not support.
+    </iframe>
+</div>
+
+
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<script type="text/javascript">
+    //"YYYY-MM-DD"
+    $('#DateFromDiv').datetimepicker({
+        format: "@Html.Raw(((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).DateFormat.ToUpper())"
+    });
+    $('#DateToDiv').datetimepicker({
+        format: "@Html.Raw(((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).DateFormat.ToUpper())"
+    });
+
+    function ShowDetailsInfo(strTitle, str) {
+
+        var strHtml = new Array();
+        var strArray = str.split(";");
+        //strHtml.push("<div class=\"table-responsive\">")
+        strHtml.push("<table class=\"table table-bordered table-condensed\" style=\"table-layout:fixed;\" contenteditable=\"false\">");
+        strHtml.push("<thead>");
+        strHtml.push("<tr>");
+        strHtml.push("<th align=\"center\" style=\"text-align:center;\" width=\"100px\" class=\"info\">@Html.MultilingualHtml("Key")</th>");
+        strHtml.push("<th align=\"center\" style=\"text-align:center;\" width=\"250px\" class=\"info\">@Html.MultilingualHtml("Value")</th>");
+        strHtml.push("</tr>");
+        strHtml.push("</thead>");
+        strHtml.push("<tbody>");
+
+        for (var i = 0; i < strArray.length; ++i) {
+            strHtml.push("<tr>");
+            var keyValuePair = strArray[i].split("=");
+            if (keyValuePair.length >= 2) {
+                for (var j = 0; j < 2; ++j) {
+                    if (j == 0) {
+                        strHtml.push("<td align=\"left\" class=\"wordwrap\" width=\"100px\">");
+                        strHtml.push(keyValuePair[j]);
+                    }
+                    else {
+                        strHtml.push("<td align=\"left\" class=\"wordwrap\" width=\"250px\">");
+                        var temp = new Array();
+                        if (keyValuePair.length > 2) {
+                            for (var k = j; k < keyValuePair.length; ++k) {
+                                temp.push(keyValuePair[k]);
+                            }
+                        }
+                        else {
+                            temp.push(keyValuePair[j]);
+                        }
+                        strHtml.push(temp.join("="));
+                    }
+                    strHtml.push("</td>");
+                }
+            }
+            strHtml.push("</tr>");
+        }
+        strHtml.push("</tbody>");
+        strHtml.push("</table>");
+        //strHtml.push("</div>");
+        ShowMsg(BootstrapDialog.TYPE_INFO, strTitle, strHtml.join(""));
+    }
+
+    $(document).ready(function () {
+        findSortingTh("AL_CreateDateTH", "desc");
+    });
+</script>

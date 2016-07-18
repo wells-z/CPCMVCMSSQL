@@ -1,0 +1,46 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+
+@model CoolPrivilegeControlVM.EntityVM.FunctionTypeVM
+@{
+    ViewBag.Title = @Html.MultilingualHtml("FTManage_Edit");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("Edit", "FTManage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionType")</label>
+                <div class="col-md-4">
+                    @Html.EditorFor(model => model.FunctionType, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+        </div>
+        @Html.HiddenFor(model => model.Timestamp)
+        @Html.HiddenFor(model => model.ID)
+    </div>
+<br />
+<div class="row">
+    <div class="col-md-1">
+        <input type="submit" value="@Html.MultilingualHtml("Save")" class="btn btn-primary" onclick="OpenLoadingDialog()">
+    </div>
+
+    @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, "FTManage", "Delete"))
+    {
+        <div class="col-md-1">
+            <a href='javascript:InvokeDeleteFunction_ByAjax(@Html.Raw("{ID:\"" + @Model.ID + "\"}"),"@Url.Action("Delete", "FTManage", new { Area = "AccessControl" })","@Url.Action("Edit", "FTManage", new { Area = "AccessControl", guid = Model.ID })");' class="btn btn-danger" role="button">@Html.MultilingualHtml("Delete")</a>
+        </div>
+    }
+    <div class="col-md-1">
+        <a href="@Url.Action("Index", "FTManage", null)" class="btn btn-default" role="button">@Html.MultilingualHtml("BacktoList")</a>
+    </div>
+</div>
+}
+
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>

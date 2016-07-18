@@ -1,0 +1,92 @@
+﻿@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+
+@model CoolPrivilegeControlVM.EntityVM.FunctionVM
+@{
+    ViewBag.Title = @Html.MultilingualHtml("FManage_Create");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+
+
+@using (Html.BeginForm("Create", "FManage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionPath")</label>
+                <div class="col-md-7">
+                    @Html.TextBoxFor(model => model.FunctionPath, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionKey")</label>
+                <div class="col-md-7">
+                    @Html.TextBoxFor(model => model.FunctionKey, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionUrl")</label>
+                <div class="col-md-7">
+                    @Html.TextBoxFor(model => model.Url, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class=" form-group">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionType")</label>
+                <div class="col-md-7">
+                    <table class="table table-striped" contenteditable="false">
+                        <thead>
+                            <tr>
+                                <th align="center" style="text-align:center; width:60px;"><input type="checkbox" value="" id="CheckAll"></th>
+                                <th align="left" style="text-align:left;">@Html.MultilingualHtml("FunctionType")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.SelectedTypeList != null && Model.SelectedTypeList.Count > 0)
+                            {
+                                for (int i = 0; i < Model.SelectedTypeList.Count; ++i)
+                                {
+                                    <tr>
+                                        <td align="center" style="text-align:center; width:60px;">@Html.CheckBoxFor(model => model.SelectedTypeList[i].Selected, new { id = "FunctionTypeCB_" + @i }) @Html.HiddenFor(model => model.SelectedTypeList[i].ID) @Html.HiddenFor(model => model.SelectedTypeList[i].FunctionType)</td>
+                                        <td align="left">@Model.SelectedTypeList[i].FunctionType</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-1">
+            <input type="submit" value="@Html.MultilingualHtml("Save")" class="btn btn-primary" onclick="OpenLoadingDialog()">
+        </div>
+
+        <div class="col-md-1">
+            <a href="@Url.Action("Index", "FManage", null)" class="btn btn-default" role="button">@Html.MultilingualHtml("BacktoList")</a>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("input[type='checkbox'][id=CheckAll]").click(function () {
+            var isChecked = $(this).is(':checked');
+            $.each($("input[type='checkbox'][id^=FunctionTypeCB_]"), function (index, item) {
+                $(item).prop('checked', isChecked);
+            });
+
+        });
+
+        $("input[type='checkbox'][id^=FunctionTypeCB_]").click(function () {
+            if (!$(this).is(':checked'))
+                $("input[type='checkbox'][id=CheckAll]").prop('checked', false);
+        });
+
+    });
+</script>

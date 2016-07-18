@@ -1,0 +1,120 @@
+﻿@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+
+@using CoolPrivilegeControlVM
+@using CoolPrivilegeControl.Models
+@model CoolPrivilegeControlVM.EntityVM.FunctionVM
+@{
+    ViewBag.Title = @Html.MultilingualHtml("FManage_Edit");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+
+
+@using (Html.BeginForm("Edit", "FManage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionPath")</label>
+                <div class="col-md-7">
+                    @Html.TextBoxFor(model => model.FunctionPath, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionKey")</label>
+                <div class="col-md-7">
+                    @Html.TextBoxFor(model => model.FunctionKey, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionName")</label>
+                <div class="col-md-7" id="lblFunctionName">
+                    <p class="form-control-static">
+                        @Html.MultilingualHtml(Model.FunctionKey)
+                    </p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionUrl")</label>
+                <div class="col-md-7">
+                    @Html.TextBoxFor(model => model.Url, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="alert alert-warning" role="alert">
+                @*<strong>Warning!</strong> Any changes of Function will affact the execution time.*@
+                @Html.Raw(Html.MultilingualHtml("I002"))
+            </div>
+            <div class=" form-group">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionType")</label>
+                <div class="col-md-4">
+                    <table class="table table-striped" contenteditable="false">
+                        <thead>
+                            <tr>
+                                <th align="center" style="text-align:center; width:60px;"><input type="checkbox" value="" id="CheckAll"></th>
+                                <th align="left" style="text-align:left;">@Html.MultilingualHtml("FunctionType")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.SelectedTypeList != null && Model.SelectedTypeList.Count > 0)
+                            {
+                                for (int i = 0; i < Model.SelectedTypeList.Count; ++i)
+                                {
+                                    <tr>
+                                        <td align="center" style="text-align:center; width:60px;">@Html.CheckBoxFor(model => model.SelectedTypeList[i].Selected, new { id = "FunctionTypeCB_" + @i }) @Html.HiddenFor(model => model.SelectedTypeList[i].ID)</td>
+                                        <td align="left">@Model.SelectedTypeList[i].FunctionType @Html.HiddenFor(model => model.SelectedTypeList[i].FunctionType)</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    @Html.HiddenFor(model => model.Timestamp)
+    @Html.HiddenFor(model => model.ID)
+    <br />
+    <div class="row">
+        <div class="col-md-1">
+            <input type="submit" value="@Html.MultilingualHtml("Save")" class="btn btn-primary" onclick="OpenLoadingDialog()">
+        </div>
+
+        @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, "FManage", "Delete"))
+        {
+            <div class="col-md-1">
+                <a href='javascript:InvokeDeleteFunction_ByAjax(@Html.Raw("{ID:\"" + @Model.ID + "\"}"),"@Url.Action("Delete", "FManage", new { Area = "AccessControl" })","@Url.Action("Edit", "FManage", new { Area = "AccessControl", guid = Model.ID })");' class="btn btn-danger" role="button">@Html.MultilingualHtml("Delete")</a>
+            </div>
+        }
+        <div class="col-md-1">
+            <a href="@Url.Action("Index", "FManage", null)" class="btn btn-default" role="button">@Html.MultilingualHtml("BacktoList")</a>
+        </div>
+    </div>
+}
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("input[type='checkbox'][id=CheckAll]").click(function () {
+            var isChecked = $(this).is(':checked');
+            $.each($("input[type='checkbox'][id^=FunctionTypeCB_]"), function (index, item) {
+                $(item).prop('checked', isChecked);
+            });
+
+        });
+
+        $("input[type='checkbox'][id^=FunctionTypeCB_]").click(function () {
+            if (!$(this).is(':checked'))
+                $("input[type='checkbox'][id=CheckAll]").prop('checked', false);
+        });
+
+        @*$("input[type='textbox'][id=FunctionKey]").change(function () {
+            var functionName=@MultilingualHtmlHelper.GetStringFromResource( $(this).val());
+            $("#lblFunctionName").text(functionName);
+        });*@
+    });
+</script>

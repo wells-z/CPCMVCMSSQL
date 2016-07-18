@@ -1,0 +1,131 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+
+@model List<LUserRoleVM>
+@{
+    ViewBag.Title = @Html.MultilingualHtml("LURoleManage");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    PagingInfo PagingInfoModel = null;
+
+    if (ViewBag.PagingInfoModel != null)
+    {
+        PagingInfoModel = (PagingInfo)ViewBag.PagingInfoModel;
+    }
+    int preCount = 0;
+
+    string sortName = "";
+    string sortDir = "";
+
+    if (HttpContext.Current.Request.QueryString.AllKeys.Contains("sort"))
+    {
+        sortName = HttpContext.Current.Request.QueryString["sort"];
+    }
+
+    if (HttpContext.Current.Request.QueryString.AllKeys.Contains("sortDir"))
+    {
+        sortDir = HttpContext.Current.Request.QueryString["sortDir"];
+    }
+}
+
+
+
+<fieldset>
+    <legend>
+        <h5>@Html.MultilingualHtml("SearchCriteria")</h5>
+    </legend>
+    @using (Html.BeginForm("Index", "LURoleManage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        LUserRoleVM selectionCriteria = new LUserRoleVM();
+        if (ViewBag.SelectionCriteria != null)
+        {
+            selectionCriteria = (LUserRoleVM)ViewBag.SelectionCriteria;
+        }
+        <div class="form-group">
+            <label class="control-label col-md-2" style=" text-align:left;" for="LoginName">@Html.MultilingualHtml("RoleName")</label>
+            <div class="col-md-4">
+                @Html.TextBox("RoleName", selectionCriteria.RoleName, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-12">
+                <input type="submit" value="@Html.MultilingualHtml("Search")" class="btn btn-default" onclick="OpenLoadingDialog()">
+            </div>
+        </div>
+    }
+</fieldset>
+@Html.Raw(Html.CPaging("Index", "LURoleManage", PagingInfoModel, "AccessControl", sortName, sortDir))
+<div class="row col-md-12">
+    &nbsp;
+</div>
+<div class="row col-md-12">
+    <div class="table-responsive">
+        <table class="table table-striped fa-border table-hover" contenteditable="false">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "RoleName")' id="RoleNameTH">@Html.MultilingualHtml("RoleName")</th>
+                    <th align="center" style="text-align:center;" onclick='javascript: sort(this, "CreateDate")' id="CreateDateTH">@Html.MultilingualHtml("CreateDate")</th>
+                    <th colspan="2" align="center" style="text-align:center;">@Html.MultilingualHtml("Operation")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    for (int i = 0; i < Model.Count; ++i)
+                    {
+                        var deleteURL = Url.Action("Delete", "LURoleManage", new { area = "AccessControl", guid = Model[i].ID });
+                        var detailsURL = Url.Action("Edit", "LURoleManage", new { area = "AccessControl", guid = Model[i].ID });
+                        var data = Html.Raw("{ID:\"" + @Model[i].ID + "\"}");
+                        <tr>
+                            <td class="vert-align">@Convert.ToInt32(i + 1 + preCount)</td>
+                            <td align="center" class="vert-align">@Model[i].RoleName</td>
+                            <td align="center" class="vert-align">@(Model[i].CreateDate.HasValue ? Model[i].CreateDate.Value.ToString(((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).DateFormat + " " + ((SystemInfoVM)CoolPrivilegeControlVM.CommonVM.StaticContent.SystemInfoInst).TimeFormat) : "")</td>
+                            @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, "LURoleManage", "Edit"))
+                            {
+                                <td align="center" width="90px"><a class="btn btn-default" href='@detailsURL'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Edit")</a></td>
+                            }
+                            else
+                            {
+                                <td align="center" width="90px"><a class="btn btn-default disabled" href='#'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Edit")</a></td>
+                            }
+                            @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, "LURoleManage", "Delete"))
+                            {
+                                <td align="center" width="90px"><a class="btn btn-danger" href='javascript:InvokeDeleteFunction_ByAjax(@data,"@deleteURL","@detailsURL");'><i class="fa fa-trash-o fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                            }
+                            else
+                            {
+                                <td align="center" width="90px"><a class="btn btn-danger disabled" href='#'><i class="fa fa-trash-o fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@Html.Raw(Html.CPaging("Index", "LURoleManage", PagingInfoModel, "AccessControl", sortName, sortDir))
+<br />
+<div class="row">
+    <div class="col-md-12">
+        @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, "LURoleManage", "Create"))
+        {
+            <a href=@Url.Action("Create", "LURoleManage" , null) class="btn btn-default" role="button">@Html.MultilingualHtml("LURoleManage_Create")</a>
+        }
+    </div>
+</div>
+
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>
+<script>
+    $(document).ready(function () {
+        findSortingTh("RoleNameTH", "asc");
+    });
+</script>

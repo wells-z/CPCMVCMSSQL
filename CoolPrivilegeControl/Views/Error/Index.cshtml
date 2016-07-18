@@ -1,0 +1,43 @@
+﻿@using System.ServiceModel
+@using CoolPrivilegeControlVM.WCFVM
+@model System.Web.Mvc.HandleErrorInfo
+@{
+    ViewBag.Title = "Oops! Error Encountered";
+    Layout = "~/Areas/AccessControl/Views/Shared/_ErrorLayout.cshtml";
+}
+
+<div class="jumbotron">
+    <h2>Oops! Error Encountered</h2>
+    <div class="alert alert-error">
+        An unexpected error has occurred. Please contact the system administrator.
+    </div>
+    @if (Model != null && CoolPrivilegeControlVM.CommonVM.StaticContent.IsDebugMode)
+    {
+        <div>
+            @if (Model.Exception.GetType() == typeof(FaultException<WCFErrorContract>))
+            {
+                var exceptionDetail = ((FaultException<WCFErrorContract>)Model.Exception);
+                <p>
+                    <b>Service Exception:</b> @exceptionDetail.Detail.StrMsg<br />
+                    <b>Controller:</b> @Model.ControllerName<br />
+                    <b>Action:</b> @Model.ActionName
+                </p>
+                <div style="overflow:scroll">
+                    <pre>@exceptionDetail.Detail.StrMsg</pre>
+                </div>
+            }
+            else
+            {
+                <p>
+                    <b>Exception:</b> @Model.Exception.Message<br />
+                    <b>Controller:</b> @Model.ControllerName<br />
+                    <b>Action:</b> @Model.ActionName
+                </p>
+                <div style="overflow:scroll">
+                    <pre>@Model.Exception.StackTrace</pre>
+                </div>
+            }
+        </div>
+    }
+    <h4>Please click <a href="@Url.Action("Index", "Login", new { area = "AccessControl" })" class="btn btn-default">here</a> to go back to the login page.</h4>
+</div>

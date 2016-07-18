@@ -1,0 +1,14 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+
+@{
+    ViewBag.Title = "SessionTimeout";
+    Layout = "~/Areas/AccessControl/Views/Shared/_ErrorLayout.cshtml";
+}
+
+<div class="jumbotron">
+    <h2>Session Expired</h2>
+    <h3>You connection to the system has expired. You must login again.</h3>
+    <h4>Please click <a href="@Url.Action("Index", "Login", new { area = "AccessControl" })" class="btn btn-default">here</a> to go back to the login page.</h4>
+</div>

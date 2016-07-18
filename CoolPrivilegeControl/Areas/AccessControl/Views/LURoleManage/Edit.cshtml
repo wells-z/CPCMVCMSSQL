@@ -1,0 +1,361 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+
+@model CoolPrivilegeControlVM.EntityVM.LUserRoleVM
+@{
+    ViewBag.Title = @Html.MultilingualHtml("LURoleManage_Edit");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+
+
+@using (Html.BeginForm("Edit", "LURoleManage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(model => model.Timestamp)
+    @Html.HiddenFor(model => model.ID)
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group required">
+                <label class="control-label col-md-4">@Html.MultilingualHtml("RoleName")</label>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.RoleName, new { @class = "form-control" })
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="FDContent" class="col-md-10 col-centered">
+        <fieldset>
+            <legend>
+                @Html.MultilingualHtml("AccessPrivilege")
+            </legend>
+            <div id="FunList">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionName")</label>
+                    <div class="col-md-4">
+                        @Html.DropDownList("FunID", (SelectList)ViewBag.FunIDs, new { @class = "form-control", @onchange = "LoadFunctionType(this.value)" })
+                    </div>
+                </div>
+
+                <div class="form-group" id="FunTypesGroup">
+                    <label class="control-label col-md-4">@Html.MultilingualHtml("FunctionType")</label>
+                    <div class="col-md-4">
+                        <table class="table table-striped" contenteditable="false">
+                            <thead>
+                                <tr>
+                                    <th align="center" style="text-align:center; width:60px;"><input type="checkbox" value="" id="FTCheckAll"></th>
+                                    <th align="left" style="text-align:left;">@Html.MultilingualHtml("FunctionType")</th>
+                                </tr>
+                            </thead>
+                            <tbody id="FunTypesList"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">&nbsp;</label>
+                    <div class="col-md-4">
+                        <input type="button" id="FunBtn_Add" value="@Html.MultilingualHtml("Add")" class="btn btn-default" onclick="AddFunDetail();">
+                        <input type="button" id="FunBtn_Edit" value="@Html.MultilingualHtml("Save")" class="btn btn-default" onclick="SaveFunDetail();">
+                        @Html.Hidden("funDListJson")
+                        @Html.Hidden("funDListPage")
+                        @Html.Hidden("funDListSort")
+                        @Html.Hidden("funDListSortDir")
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+
+    <div class="row">
+        <div class="col-md-1">
+            <input type="submit" value="@Html.MultilingualHtml("Save")" class="btn btn-primary" onclick="OpenLoadingDialog()">
+        </div>
+
+        @if (Html.CheckAccPrivilege(ViewContext.Controller, Context, "LURoleManage", "Delete"))
+        {
+            var deleteURL = Url.Action("Delete", "LURoleManage", new { area = "AccessControl", guid = Model.ID });
+            var detailsURL = Url.Action("Edit", "LURoleManage", new { area = "AccessControl", guid = Model.ID });
+            var data = Html.Raw("{ID:\"" + @Model.ID + "\"}");
+
+            <div class="col-md-1">
+                <a class="btn btn-danger" href='javascript:InvokeDeleteFunction_ByAjax(@data,"@deleteURL","@detailsURL");'><i class="fa fa-trash-o fa-fw"></i> @Html.MultilingualHtml("Delete")</a>
+            </div>
+        }
+
+        <div class="col-md-1">
+            <a href="@Url.Action("Index", "LURoleManage", null)" class="btn btn-default" role="button">@Html.MultilingualHtml("BacktoList")</a>
+        </div>
+    </div>
+}
+
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<script type="text/javascript">
+    var CurrentFunDetailInfo;
+    var CurrentFunDetailInfo;
+
+    function LoadFunctionType(F_ID) {
+        $("#FunTypesGroup").hide();
+        $("#FunTypesList").empty();
+        if (F_ID != "" && F_ID != undefined) {
+            var urlPath = "@Url.Action("GetFTList", "LoginUserManage")";
+
+            var json_Data = { FunID: "" + F_ID + "" };
+            $.ajax({
+                type: "post",
+                url: urlPath,
+                data: AddAntiForgeryToken(json_Data),
+                success: function (response) {
+                    if (response != null && response != undefined) {
+                        if (response.FTID != null || response.FTID != undefined) {
+                            $("#FunTypesGroup").show();
+                            $("#FunTypesList").empty();
+                            CurrentFunDetailInfo = response;
+                            for (var i = 0; i < response.FTName.length; ++i) {
+                                var innerHtml = new Array();
+
+                                innerHtml.push("<tr>");
+                                innerHtml.push("<td align=\"center\" style=\"text-align:center; width:60px;\">");
+                                innerHtml.push("<input type=\"checkbox\" id=\"FunctionTypeCB_" + (i + 1) + "\" onclick=\"chickItemCheckBox(this);\" />");
+                                innerHtml.push("</td>");
+                                innerHtml.push("<td align=\"left\">" + response.FTName[i] + "</td>");
+                                innerHtml.push("</tr>");
+                                $("#FunTypesList").append(innerHtml.join(""));
+                            }
+                        }
+                    }
+                    else {
+                        $("#FunTypesGroup").hide();
+                    }
+                }
+            });
+        }
+        $("input[type='checkbox'][id=FTCheckAll]").prop('checked', false);
+    }
+
+    function AddFunDetail() {
+        var FunDetailInfoList_Str = $("#funDListJson").val();
+        var funDListPage = $("#funDListPage").val();
+        var funDListSort = $("#funDListSort").val();
+        var funDListSortDir = $("#funDListSortDir").val();
+
+        var FunDetailInfoList = null;
+        if (FunDetailInfoList_Str != "" && FunDetailInfoList_Str != undefined) {
+            FunDetailInfoList = $.parseJSON(FunDetailInfoList_Str);
+        }
+
+        if (FunDetailInfoList == null || FunDetailInfoList == undefined) {
+            if (CurrentFunDetailInfo != null && CurrentFunDetailInfo != undefined) {
+                FunDetailInfoList = new Array();
+                FunDetailInfoList.push(CurrentFunDetailInfo);
+            }
+        }
+        else {
+            if (CurrentFunDetailInfo != null && CurrentFunDetailInfo != undefined) {
+                var isExists = false;
+                for (var i = 0; i < FunDetailInfoList.length; ++i) {
+                    if (FunDetailInfoList[i].FID == CurrentFunDetailInfo.FID) {
+                        isExists = true;
+                    }
+                }
+                if (!isExists)
+                    FunDetailInfoList.push(CurrentFunDetailInfo);
+            }
+        }
+        var str_funList = JSON.stringify(FunDetailInfoList);
+
+        LoadFunDList(str_funList, funDListPage, funDListSort, funDListSortDir);
+
+        $("#FunID").val("");
+        CurrentFunDetailInfo = null;
+        LoadFunctionType("");
+        $("input[type='checkbox'][id=FTCheckAll]").prop('checked', false);
+
+        $("#funDListJson").val(str_funList);
+    }
+
+    function SaveFunDetail() {
+        var FunDetailInfoList_Str = $("#funDListJson").val();
+        var funDListPage = $("#funDListPage").val();
+        var funDListSort = $("#funDListSort").val();
+        var funDListSortDir = $("#funDListSortDir").val();
+
+        if (FunDetailInfoList_Str != "" && FunDetailInfoList_Str != undefined) {
+            var FunDetailInfoList = $.parseJSON(FunDetailInfoList_Str);
+            if (CurrentFunDetailInfo != null && CurrentFunDetailInfo != undefined) {
+                var isExists = false;
+                for (var i = 0; i < FunDetailInfoList.length; ++i) {
+                    if (FunDetailInfoList[i].FID == CurrentFunDetailInfo.FID) {
+                        FunDetailInfoList[i] = CurrentFunDetailInfo;
+                    }
+                }
+            }
+            var str_funList = JSON.stringify(FunDetailInfoList);
+            LoadFunDList(str_funList, funDListPage, funDListSort, funDListSortDir);
+
+            $("#FunID").val("");
+            CurrentFunDetailInfo = null;
+            LoadFunctionType("");
+            $("input[type='checkbox'][id=FTCheckAll]").prop('checked', false);
+
+            $("#FunID").prop("disabled", false);
+            $("#FunBtn_Edit").hide();
+            $("#FunBtn_Add").show();
+
+            $("#funDListJson").val(str_funList);
+        }
+    }
+
+    function DelFunDetail(F_ID) {
+        var FunDetailInfoList_Str = $("#funDListJson").val();
+        var funDListPage = $("#funDListPage").val();
+        var funDListSort = $("#funDListSort").val();
+        var funDListSortDir = $("#funDListSortDir").val();
+
+        if (FunDetailInfoList_Str != "" && FunDetailInfoList_Str != undefined) {
+            var FunDetailInfoList = $.parseJSON(FunDetailInfoList_Str);
+            var temp_FunDetailInfoList = new Array();
+            for (var i = 0; i < FunDetailInfoList.length; ++i) {
+                if (FunDetailInfoList[i].FID != F_ID) {
+                    temp_FunDetailInfoList.push(FunDetailInfoList[i]);
+                }
+            }
+            FunDetailInfoList = temp_FunDetailInfoList;
+
+            var str_funList = JSON.stringify(FunDetailInfoList);
+
+            LoadFunDList(str_funList, funDListPage, funDListSort, funDListSortDir);
+
+            $("#funDListJson").val(str_funList);
+        }
+    }
+
+    function EditFunDetail(F_ID) {
+        var FunDetailInfoList_Str = $("#funDListJson").val();
+        $("#FunTypesGroup").hide();
+        $("#FunTypesList").empty();
+
+        if (FunDetailInfoList_Str != "" && FunDetailInfoList_Str != undefined) {
+            var FunDetailInfoList = $.parseJSON(FunDetailInfoList_Str);
+
+            for (var i = 0; i < FunDetailInfoList.length; ++i) {
+                if (FunDetailInfoList[i].FID == F_ID) {
+                    CurrentFunDetailInfo = FunDetailInfoList[i]
+                }
+            }
+
+            $("#FunTypesList").empty();
+            $("#FunTypesGroup").show();
+            for (var i = 0; i < CurrentFunDetailInfo.FTName.length; ++i) {
+                var innerHtml = new Array();
+
+                innerHtml.push("<tr>");
+                innerHtml.push("<td align=\"center\" style=\"text-align:center; width:60px;\">");
+                innerHtml.push("<input type=\"checkbox\" id=\"FunctionTypeCB_" + (i + 1) + "\" onclick=\"chickItemCheckBox(this);\" " + (CurrentFunDetailInfo.FDSelected[i] ? "checked" : "") + " />");
+                innerHtml.push("</td>");
+                innerHtml.push("<td align=\"left\">" + CurrentFunDetailInfo.FTName[i] + "</td>");
+                innerHtml.push("</tr>");
+                $("#FunTypesList").append(innerHtml.join(""));
+            }
+            $("#FunID").val(CurrentFunDetailInfo.FID);
+            $("#FunID").prop("disabled", true);
+            $("#FunBtn_Edit").show();
+            $("#FunBtn_Add").hide();
+
+            var str_funList = JSON.stringify(FunDetailInfoList);
+
+            $("#funDListJson").val(str_funList);
+        }
+    }
+
+    function LoadFunDList(jsonStr, pageIndex, sort, sortDir) {
+        var jsonStrList = "";
+        var funDListPage = "1";
+        var funDListSort = "";
+        var funDListSortDir = "";
+
+        if (jsonStr != "" && jsonStr != undefined) {
+            jsonStrList = jsonStr;
+        }
+
+        if (pageIndex != "" && pageIndex != undefined) {
+            funDListPage = pageIndex;
+        }
+
+        if (sort != "" && sort != undefined) {
+            funDListSort = sort;
+        }
+
+        if (sortDir != "" && sortDir != c) {
+            funDListSortDir = sortDir;
+        }
+
+        var urlPath = "@Url.Action("Index_FDList", "LoginUserManage")";
+
+        var json_Data = { FunDetailInfoListStr: jsonStrList, funDListPage: "" + funDListPage + "", funDListSort: "" + funDListSort + "", funDListSortDir: "" + funDListSortDir + "" };
+        $.ajax({
+            type: "post",
+            url: urlPath,
+            data: AddAntiForgeryToken(json_Data),
+            success: function (response) {
+                if (response != null && response != undefined) {
+                    $("#FunList").html(response);
+                }
+                else {
+                    $("#FunList").empty();
+                }
+            }
+        });
+    }
+
+    function chickItemCheckBox(obj) {
+        var fdInfo = CurrentFunDetailInfo;
+        var indexOfType = $(obj).attr("id").replace("FunctionTypeCB_", "");
+        if (!$(obj).is(':checked')) {
+            $("input[type='checkbox'][id=FTCheckAll]").prop('checked', false);
+
+            fdInfo.FDSelected[indexOfType - 1] = false;
+        }
+        else {
+            fdInfo.FDSelected[indexOfType - 1] = true;
+        }
+        CurrentFunDetailInfo = fdInfo;
+    }
+
+    $(document).ready(function () {
+        var FunDetailInfoList_Str = $("#funDListJson").val();
+        var funDListPage = $("#funDListPage").val();
+        var funDListSort = $("#funDListSort").val();
+        var funDListSortDir = $("#funDListSortDir").val();
+
+        if (FunDetailInfoList_Str != "" && FunDetailInfoList_Str != undefined) {
+            LoadFunDList(FunDetailInfoList_Str, funDListPage, funDListSort, funDListSortDir);
+        }
+
+        $("#FunTypesGroup").hide();
+        $("#FunBtn_Edit").hide();
+        $("#FunBtn_Add").show();
+
+        $("input[type='checkbox'][id=FTCheckAll]").click(function () {
+            var isChecked = $(this).is(':checked');
+            $.each($("input[type='checkbox'][id^=FunctionTypeCB_]"), function (index, item) {
+                if (CurrentFunDetailInfo != null && CurrentFunDetailInfo != undefined) {
+                    for (var i = 0; i < CurrentFunDetailInfo.FDSelected.length; ++i) {
+                        CurrentFunDetailInfo.FDSelected[i] = isChecked;
+                    }
+                }
+                $(item).prop('checked', isChecked);
+            });
+
+        });
+    });
+</script>

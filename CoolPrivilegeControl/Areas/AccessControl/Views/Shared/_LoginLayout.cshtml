@@ -1,0 +1,76 @@
+﻿@using UI_Infrastructure.ViewModels
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+    <title>@ViewBag.Title</title>
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/Common")
+    @Styles.Render("~/Content/css")
+</head>
+<body>
+    @*<div class="container">
+        <div class="row center-block" style="width:970px;text-align:center;">
+            <div class="col-md-12">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- TopAdvLarge -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:970px;height:90px"
+                     data-ad-client="ca-pub-8499258466734377"
+                     data-ad-slot="5111758445"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        @if (this.Request.RequestContext.RouteData.Values["action"].ToString() == "Reset")
+        {
+            if (TempData.ContainsKey(UI_Infrastructure.Bootstrapper.UserClientSessionKey.ToString()))
+            {
+                @Html.Raw(Html.GenMenuBar("/AccessControl/Login/Logout", null))
+            }
+        }
+    </div>*@
+
+    <div class="container">
+        @RenderBody()
+    </div>
+
+    @RenderSection("scripts", required: false)
+    <script>
+        $(document).ready(function () {
+            @{
+                if (ViewBag.ActionMessage != null)
+                {
+                    var msgInfo = ((MsgInfo)ViewBag.ActionMessage);
+
+                    if (msgInfo.MsgType==MessageType.Success)
+                    {
+                        @:ShowMsg(BootstrapDialog.TYPE_SUCCESS, "@Html.Encode(msgInfo.MsgTitle)", "@Html.Raw(CoolUtilities.StringUtility.ReplaceAll(msgInfo.MsgDesc,"'","\'"))");
+                    }
+                    else
+                    {
+                        @:ShowMsg(BootstrapDialog.TYPE_DANGER, "@Html.Encode(msgInfo.MsgTitle)", "@Html.Raw(CoolUtilities.StringUtility.ReplaceAll(msgInfo.MsgDesc,"'","\'"))");
+                    }
+                    string actionMsgKey=CoolPrivilegeControlVM.CommonVM.StaticContent.ActionMessage_Prefix + "_" + HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+                    if (TempData.ContainsKey(actionMsgKey))
+                    {
+                        TempData.Remove(actionMsgKey);
+                    }
+                 }
+             }
+        });
+
+
+    </script>
+</body>
+</html>

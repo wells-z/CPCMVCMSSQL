@@ -1,0 +1,161 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+@using UI_Infrastructure.ViewModels
+
+@model CoolPrivilegeControlVM.EntityVM.SystemInfoVM
+@{
+    ViewBag.Title = @Html.MultilingualHtml("SystemInfoManage_Edit");
+    Layout = "~/Areas/AccessControl/Views/Shared/_Layout.cshtml";
+}
+
+
+
+@using (Html.BeginForm("Edit", "SystemInfoManage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-group">
+        <label class="control-label col-md-3" style=" text-align:left;" for="SessionTimeoutSeconds">@Html.MultilingualHtml("SessionTimeoutSeconds")</label>
+        <div class="col-md-2">
+            <div class="input-group spinner" data-trigger="spinner">
+                <input type="text" class="form-control" name="SessionTimeoutSeconds" id="SessionTimeoutSeconds" value="@Model.SessionTimeoutSeconds" data-rule="quantity" data-max="3600" data-min="5">
+                <div class="input-group-addon">
+                    <a href="javascript:;" class="spin-up" data-spin="up"><i class="fa fa-sort-up"></i></a>
+                    <a href="javascript:;" class="spin-down" data-spin="down"><i class="fa fa-sort-down"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-1" style=" text-align:left;" for="PageSize">@Html.MultilingualHtml("PageSize")</label>
+        <div class="col-md-2">
+            <div class="input-group spinner" data-trigger="spinner">
+                <input type="text" class="form-control" name="PageSize" id="PageSize" value="@Model.PageSize" data-rule="quantity" data-min="1">
+                <div class="input-group-addon">
+                    <a href="javascript:;" class="spin-up" data-spin="up"><i class="fa fa-sort-up"></i></a>
+                    <a href="javascript:;" class="spin-down" data-spin="down"><i class="fa fa-sort-down"></i></a>
+                </div>
+            </div>
+        </div>
+        <label class="control-label col-md-4" style=" text-align:left;" for="DisplayPageNum">@Html.MultilingualHtml("DisplayPageNum")</label>
+        <div class="col-md-2">
+            <div class="input-group spinner" data-trigger="spinner">
+                <input type="text" class="form-control" name="DisplayPageNum" id="DisplayPageNum" value="@Model.DisplayPageNum" data-rule="quantity" data-min="5">
+                <div class="input-group-addon">
+                    <a href="javascript:;" class="spin-up" data-spin="up"><i class="fa fa-sort-up"></i></a>
+                    <a href="javascript:;" class="spin-down" data-spin="down"><i class="fa fa-sort-down"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-4" style=" text-align:left;" for="Password_ReuseNum">@Html.MultilingualHtml("DateFormat")</label>
+        <div class="col-md-2">
+            @Html.TextBox("DateFormat", Model.DateFormat, new { @class = "form-control" })
+        </div>
+        <label class="control-label col-md-2" style=" text-align:left;" for="Password_ExpireDays">@Html.MultilingualHtml("TimeFormat")</label>
+        <div class="col-md-2">
+            @Html.TextBox("TimeFormat", Model.TimeFormat, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-3" style=" text-align:left;">
+            @Html.MultilingualHtml("Password_Policy"):
+        </label>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-3" style=" text-align:left;" for="PageSize">@Html.MultilingualHtml("MaximumLoginAttempts")</label>
+        <div class="col-md-2">
+            <div class="input-group spinner" data-trigger="spinner">
+                <input type="text" class="form-control" name="Password_MaximumCount" id="Password_MaximumCount" value="@Model.Password_MaximumCount" data-rule="quantity" data-min="3">
+                <div class="input-group-addon">
+                    <a href="javascript:;" class="spin-up" data-spin="up"><i class="fa fa-sort-up"></i></a>
+                    <a href="javascript:;" class="spin-down" data-spin="down"><i class="fa fa-sort-down"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2" style=" text-align:left;" for="Password_LengthMin">@Html.MultilingualHtml("Password_Length")&nbsp;&nbsp;&nbsp;@Html.MultilingualHtml("From")</label>
+        <div class="col-md-2">
+            <div class="input-group spinner" data-trigger="spinner">
+                <input type="text" class="form-control" name="Password_LengthMin" id="Password_LengthMin" value="@Model.Password_LengthMin" data-rule="quantity" data-min="8" data-max="50">
+                <div class="input-group-addon">
+                    <a href="javascript:;" class="spin-up" data-spin="up"><i class="fa fa-sort-up"></i></a>
+                    <a href="javascript:;" class="spin-down" data-spin="down"><i class="fa fa-sort-down"></i></a>
+                </div>
+            </div>
+        </div>
+        <label class="control-label col-md-1" style=" text-align:center;" for="Password_LengthMax">@Html.MultilingualHtml("To")</label>
+        <div class="col-md-2">
+            <div class="input-group spinner" data-trigger="spinner">
+                <input type="text" class="form-control" name="Password_LengthMax" id="Password_LengthMax" value="@Model.Password_LengthMax" data-rule="quantity" minimum="@Model.Password_LengthMax" data-min="8" data-max="50">
+                <div class="input-group-addon">
+                    <a href="javascript:;" class="spin-up" data-spin="up"><i class="fa fa-sort-up"></i></a>
+                    <a href="javascript:;" class="spin-down" data-spin="down"><i class="fa fa-sort-down"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-4" style=" text-align:left;" for="Password_ReuseNum">@Html.MultilingualHtml("Password_ReuseNum")</label>
+        <div class="col-md-2">
+            <div class="input-group spinner" data-trigger="spinner">
+                <input type="text" class="form-control" name="Password_ReuseNum" id="Password_ReuseNum" value="@Model.Password_ReuseNum" data-rule="quantity" minimum="@Model.Password_ReuseNum" data-min="1" data-max="10">
+                <div class="input-group-addon">
+                    <a href="javascript:;" class="spin-up" data-spin="up"><i class="fa fa-sort-up"></i></a>
+                    <a href="javascript:;" class="spin-down" data-spin="down"><i class="fa fa-sort-down"></i></a>
+                </div>
+            </div>
+        </div>
+        <label class="control-label col-md-2" style=" text-align:left;" for="Password_ExpireDays">@Html.MultilingualHtml("Password_ExpireDays")</label>
+        <div class="col-md-2">
+            <div class="input-group spinner" data-trigger="spinner">
+                <input type="text" class="form-control" name="Password_ExpireDays" id="Password_ExpireDays" value="@Model.Password_ExpireDays" data-rule="quantity" minimum="@Model.Password_ExpireDays" data-min="60" data-max="3650">
+                <div class="input-group-addon">
+                    <a href="javascript:;" class="spin-up" data-spin="up"><i class="fa fa-sort-up"></i></a>
+                    <a href="javascript:;" class="spin-down" data-spin="down"><i class="fa fa-sort-down"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <div class="col-md-4" style="padding-left:35px;">
+            <label class="checkbox">
+                @Html.CheckBoxFor(model => model.Password_IncludeDiffCase, new { htmlAttributes = new { @class = "form-control" } }) @Html.MultilingualHtml("Password_IncludeDiffCase")
+            </label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-4" style="padding-left:35px;">
+            <label class="checkbox">
+                @Html.CheckBoxFor(model => model.Password_IncludeNumDigit, new { htmlAttributes = new { @class = "form-control" } }) @Html.MultilingualHtml("Password_IncludeNumDigit")
+            </label>
+        </div>
+
+    </div>
+    <div class="form-group">
+        <div class="col-md-4" style="padding-left:35px;">
+            <label class="checkbox">
+                @Html.CheckBoxFor(model => model.Password_IncludeSpecialChar, new { htmlAttributes = new { @class = "form-control" } }) @Html.MultilingualHtml("Password_IncludeSpecialChar")
+            </label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <input type="submit" value="@Html.MultilingualHtml("Save")" class="btn btn-primary" onclick="OpenLoadingDialog()">
+        </div>
+    </div>
+}
+<br />
+
+<form id="__AjaxAntiForgeryForm" action="#" method="post">
+    @Html.AntiForgeryToken()
+</form>

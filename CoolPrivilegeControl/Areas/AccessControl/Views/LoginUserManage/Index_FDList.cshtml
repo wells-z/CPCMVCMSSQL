@@ -1,0 +1,182 @@
+﻿@using CoolPrivilegeControlVM.EntityVM
+@using CoolPrivilegeControlLangPack
+@using UI_Infrastructure.CustomHtmlHelper
+
+@model List<FunDetailInfo>
+
+
+@{
+    PagingInfo FDPagingInfoModel = null;
+
+    if (ViewBag.FDPagingInfoModel != null)
+    {
+        FDPagingInfoModel = (PagingInfo)ViewBag.FDPagingInfoModel;
+    }
+    int preCount = 0;
+
+
+}
+
+@if (FDPagingInfoModel != null && FDPagingInfoModel.Pages != null && FDPagingInfoModel.Pages.Count > 0)
+{
+    preCount = (FDPagingInfoModel.CurrentPage - 1) * FDPagingInfoModel.PageSize;
+    <div class="row col-md-12">
+        <div class="center-block">
+            <ul class="pagination" style="margin: 0px !important; vertical-align: middle;" contenteditable="false">
+
+                @if (FDPagingInfoModel.CurrentPage == 1)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("First")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadFunDList($("#funDListJson").val(),"1",$("#funDListSort").val(),$("#funDListSortDir").val());'>@Html.MultilingualHtml("First")</a></li>
+                }
+
+                @for (int i = 0; i < FDPagingInfoModel.Pages.Count; ++i)
+                {
+                    string liClass = "";
+
+                    if (i == 0 && FDPagingInfoModel.CurrentPage == 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (FDPagingInfoModel.CurrentPage == FDPagingInfoModel.Pages[i] && i == FDPagingInfoModel.Pages.Count - 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (i != 0 && i != FDPagingInfoModel.Pages.Count - 1 && FDPagingInfoModel.CurrentPage == FDPagingInfoModel.Pages[i])
+                    {
+                        liClass = "active";
+                    }
+
+                    <li class="@Html.Raw(liClass)">
+                        <a href='javascript:LoadFunDList($("#funDListJson").val(),"@FDPagingInfoModel.Pages[i].ToString()",$("#funDListSort").val(),$("#funDListSortDir").val());'>
+                            @if (i == 0)
+                            {
+                                @Html.MultilingualHtml("Prev");
+                            }
+                            else if (i == FDPagingInfoModel.Pages.Count - 1)
+                            {
+                                @Html.MultilingualHtml("Next");
+                            }
+                            else
+                            {
+                                @Html.Raw((FDPagingInfoModel.Pages[i]).ToString());
+                            }
+                        </a>
+                    </li>
+                }
+
+                @if (FDPagingInfoModel.CurrentPage == FDPagingInfoModel.TotalPage)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("Last")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadFunDList($("#funDListJson").val(),"@FDPagingInfoModel.TotalPage",$("#funDListSort").val(),$("#funDListSortDir").val());'>@Html.MultilingualHtml("Last")</a></li>
+                }
+
+            </ul>
+        </div>
+    </div>
+}
+<div class="row col-md-12">
+    &nbsp;
+</div>
+<div class="row col-md-12">
+    <div class="table-responsive">
+        <table class="table table-striped fa-border table-hover" contenteditable="false">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th align="left" style="text-align:left;">
+                    @Html.MultilingualHtml("FunctionKey")</th>
+                    <th align="left" style="text-align:left;">@Html.MultilingualHtml("FunctionName")</th>
+                    <th align="center" style="text-align:center;" colspan="2">@Html.MultilingualHtml("Operation")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    for (int i = 0; i < Model.Count; ++i)
+                    {
+                        <tr>
+                            <td class="vert-align" style="width:50px;">@Convert.ToInt32(i + 1 + preCount)</td>
+                            <td align="left" class="vert-align">
+                            @Html.ActionLink(Model[i].FName, "Edit", "FManage", new { area = "AccessControl", guid = Model[i].FID }, null)</td>
+                            <td align="left" class="vert-align">@Html.MultilingualHtml(Model[i].FName)</td>
+                            <td align="center" width="90px"><a class="btn btn-default" href='javascript:EditFunDetail("@Model[i].FID");'><i class="fa fa-pencil fa-fw"></i> @Html.MultilingualHtml("Edit")</a></td>
+                            <td align="center" width="90px"><a class="btn btn-danger" href='javascript:DelFunDetail("@Model[i].FID");'><i class="fa fa-trash-o fa-fw"></i> @Html.MultilingualHtml("Delete")</a></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (FDPagingInfoModel != null && FDPagingInfoModel.Pages != null && FDPagingInfoModel.Pages.Count > 0)
+{
+    preCount = (FDPagingInfoModel.CurrentPage - 1) * FDPagingInfoModel.PageSize;
+    <div class="row col-md-12">
+        <div class="center-block">
+            <ul class="pagination" style="margin: 0px !important; vertical-align: middle;" contenteditable="false">
+
+                @if (FDPagingInfoModel.CurrentPage == 1)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("First")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadFunDList($("#funDListJson").val(),"1",$("#funDListSort").val(),$("#funDListSortDir").val());'>@Html.MultilingualHtml("First")</a></li>
+                }
+
+                @for (int i = 0; i < FDPagingInfoModel.Pages.Count; ++i)
+                {
+                    string liClass = "";
+
+                    if (i == 0 && FDPagingInfoModel.CurrentPage == 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (FDPagingInfoModel.CurrentPage == FDPagingInfoModel.Pages[i] && i == FDPagingInfoModel.Pages.Count - 1)
+                    {
+                        liClass = "disabled";
+                    }
+                    else if (i != 0 && i != FDPagingInfoModel.Pages.Count - 1 && FDPagingInfoModel.CurrentPage == FDPagingInfoModel.Pages[i])
+                    {
+                        liClass = "active";
+                    }
+
+                    <li class="@Html.Raw(liClass)">
+                        <a href='javascript:LoadFunDList($("#funDListJson").val(),"@FDPagingInfoModel.Pages[i].ToString()",$("#funDListSort").val(),$("#funDListSortDir").val());'>
+                            @if (i == 0)
+                            {
+                                @Html.MultilingualHtml("Prev");
+                            }
+                            else if (i == FDPagingInfoModel.Pages.Count - 1)
+                            {
+                                @Html.MultilingualHtml("Next");
+                            }
+                            else
+                            {
+                                @Html.Raw((FDPagingInfoModel.Pages[i]).ToString());
+                            }
+                        </a>
+                    </li>
+                }
+
+                @if (FDPagingInfoModel.CurrentPage == FDPagingInfoModel.TotalPage)
+                {
+                    <li class="disabled"><a href="#">@Html.MultilingualHtml("Last")</a></li>
+                }
+                else
+                {
+                    <li><a href='javascript:LoadFunDList($("#funDListJson").val(),"@FDPagingInfoModel.TotalPage",$("#funDListSort").val(),$("#funDListSortDir").val());'>@Html.MultilingualHtml("Last")</a></li>
+                }
+
+            </ul>
+        </div>
+    </div>
+}
